@@ -1,4 +1,3 @@
-import { Status } from 'discord.js';
 import { StatusCodes } from 'http-status-codes';
 
 export default class NotFound extends Error {
