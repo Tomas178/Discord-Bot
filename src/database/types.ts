@@ -27,14 +27,8 @@ export interface Templates {
   templateMessage: string;
 }
 
-export interface Users {
-  id: Generated<number>;
-  username: string;
-}
-
 export interface DB {
   messages: Messages;
   sprints: Sprints;
   templates: Templates;
-  users: Users;
 }
