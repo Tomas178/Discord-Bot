@@ -10,7 +10,7 @@ type JsonHandler<T> = (
 
 export function jsonRoute<T>(
   handler: JsonHandler<T>,
-  statusCode: StatusCodes.OK
+  statusCode = StatusCodes.OK
 ): RequestHandler {
   return async (req, res, next) => {
     try {
