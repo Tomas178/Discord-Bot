@@ -1,12 +1,15 @@
 import { Sprints } from '@/database';
 import z from 'zod';
 
+const sprintCodeRegex = new RegExp(/^[A-Z]+-\d+\.\d+$/);
+const sprintCodeErrorMessage =
+  'Sprint code must match the pattern: Course-Module.Sprint (e.g., WD-1.1) ';
+
 type Record = Sprints;
 const schema = z.object({
   id: z.coerce.number().int().positive(),
-  sprintCode: z.string().regex(/^[A-Z]+-\d+\.\d+$/, {
-    message:
-      'Sprint code must match the pattern: Course-Module.Sprint (e.g., WD-1.1) ',
+  sprintCode: z.string().regex(sprintCodeRegex, {
+    message: sprintCodeErrorMessage,
   }),
 });
 
@@ -14,7 +17,13 @@ const insertable = schema.omit({
   id: true,
 });
 
-const updateable = insertable.partial();
+const updateable = insertable
+  .extend({
+    newSprintCode: z.string().regex(sprintCodeRegex, {
+      message: sprintCodeErrorMessage,
+    }),
+  })
+  .partial();
 
 export const parse = (record: unknown) => schema.parse(record);
 export const parseId = (id: unknown) => schema.shape.id.parse(id);
