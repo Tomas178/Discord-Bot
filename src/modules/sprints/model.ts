@@ -13,6 +13,9 @@ export default (db: Database) => ({
   findAll: async (): Promise<RowSelect[]> =>
     db.selectFrom(TABLE).selectAll().execute(),
 
+  findById: async (id: number): Promise<RowSelect | undefined> =>
+    db.selectFrom(TABLE).selectAll().where('id', '=', id).executeTakeFirst(),
+
   findBySprintCode: async (
     sprintCode: string
   ): Promise<RowSelect | undefined> =>
@@ -26,29 +29,29 @@ export default (db: Database) => ({
     db.insertInto(TABLE).values(record).returning(keys).executeTakeFirst(),
 
   update: async (
-    sprintCode: string,
+    id: number,
     partial: RowUpdate
   ): Promise<RowSelect | undefined> => {
     if (Object.keys(partial).length === 0) {
       return db
         .selectFrom(TABLE)
         .select(keys)
-        .where('sprintCode', '=', sprintCode)
+        .where('id', '=', id)
         .executeTakeFirst();
     }
 
     return db
       .updateTable(TABLE)
       .set(partial)
-      .where('sprintCode', '=', sprintCode)
+      .where('id', '=', id)
       .returning(keys)
       .executeTakeFirst();
   },
 
-  remove: async (sprintCode: string): Promise<RowSelect | undefined> =>
+  remove: async (id: number): Promise<RowSelect | undefined> =>
     db
       .deleteFrom(TABLE)
-      .where('sprintCode', '=', sprintCode)
+      .where('id', '=', id)
       .returning(keys)
       .executeTakeFirst(),
 });

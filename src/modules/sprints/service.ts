@@ -11,28 +11,35 @@ export default (db: Database) => {
     createSprint: async (data: RowInsert) => {
       const existing = await sprints.findBySprintCode(data.sprintCode);
       if (existing) {
-        throw new SprintAlreadyExists(data.sprintCode);
+        throw new SprintAlreadyExists(existing.sprintCode);
       }
 
       return sprints.create(data);
     },
 
-    updateSprint: async (sprintCode: string, data: RowUpdate) => {
-      const existing = await sprints.findBySprintCode(sprintCode);
+    updateSprint: async (id: number, data: RowUpdate) => {
+      const existing = await sprints.findById(id);
       if (!existing) {
-        throw new SprintNotFound(sprintCode);
+        throw new SprintNotFound(id);
       }
 
-      return sprints.update(sprintCode, data);
+      if (data.sprintCode) {
+        const duplicate = await sprints.findBySprintCode(data.sprintCode);
+        if (duplicate) {
+          throw new SprintAlreadyExists(duplicate.sprintCode);
+        }
+      }
+
+      return sprints.update(id, data);
     },
 
-    removeSprint: async (sprintCode: string) => {
-      const existing = await sprints.findBySprintCode(sprintCode);
+    removeSprint: async (id: number) => {
+      const existing = await sprints.findById(id);
       if (!existing) {
-        throw new SprintNotFound(sprintCode);
+        throw new SprintNotFound(id);
       }
 
-      return sprints.remove(sprintCode);
+      return sprints.remove(id);
     },
   };
 };

@@ -17,13 +17,7 @@ const insertable = schema.omit({
   id: true,
 });
 
-const updateable = insertable
-  .extend({
-    newSprintCode: z.string().regex(sprintCodeRegex, {
-      message: sprintCodeErrorMessage,
-    }),
-  })
-  .partial();
+const updateable = insertable.partial();
 
 export const parse = (record: unknown) => schema.parse(record);
 export const parseId = (id: unknown) => schema.shape.id.parse(id);

@@ -5,13 +5,13 @@ export class SprintAlreadyExists extends Error {
   status: number;
 
   constructor(sprintCode: string) {
-    super(`Sprint with code "${sprintCode}" already exists.`);
+    super(`Sprint with sprintCode "${sprintCode}" already exists.`);
     this.status = StatusCodes.CONFLICT;
   }
 }
 
 export class SprintNotFound extends NotFound {
-  constructor(code: string) {
-    super(`Sprint with code ${code} already exists`);
+  constructor(id: number) {
+    super(`Sprint with id ${id} already exists`);
   }
 }

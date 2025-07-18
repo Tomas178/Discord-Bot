@@ -1,7 +1,7 @@
 import createTestDatabase from '@tests/utils/createTestDatabase';
 import buildModel from '../model';
 import { createFor, selectAllFor } from '@tests/utils/record';
-import { INSERTABLE_SPRINTS, SPRINT_CODES_FOR_UPDATE } from './utils/constants';
+import { INSERTABLE_SPRINTS, SPRINTS_FOR_UPDATE } from './utils/constants';
 import { fakeSprint, fakeSprintFull, sprintMatcher } from './utils/utils';
 
 const db = await createTestDatabase();
@@ -27,6 +27,20 @@ describe('findAll', () => {
     expect(sprints[0]).toEqual(sprintMatcher(INSERTABLE_SPRINTS[0]));
     expect(sprints[1]).toEqual(sprintMatcher(INSERTABLE_SPRINTS[1]));
     expect(sprints[2]).toEqual(sprintMatcher(INSERTABLE_SPRINTS[2]));
+  });
+});
+
+describe('findById', () => {
+  it('Should return sprint by given id', async () => {
+    const [sprint] = await createSprints(fakeSprintFull());
+
+    const sprintInDatabse = await model.findById(sprint.id);
+    expect(sprintInDatabse).toEqual(sprint);
+  });
+
+  it('Should return undefined if sprint is not found', async () => {
+    const sprintInDatabase = await model.findById(999);
+    expect(sprintInDatabase).toBeUndefined();
   });
 });
 
@@ -59,13 +73,13 @@ describe('update', () => {
   it('Should update a sprint', async () => {
     const [sprint] = await createSprints(fakeSprintFull());
 
-    const updatedSprint = await model.update(sprint.sprintCode, {
-      sprintCode: SPRINT_CODES_FOR_UPDATE[0],
+    const updatedSprint = await model.update(sprint.id, {
+      sprintCode: SPRINTS_FOR_UPDATE[0].sprintCode,
     });
 
     expect(updatedSprint).toMatchObject(
       sprintMatcher({
-        sprintCode: SPRINT_CODES_FOR_UPDATE[0],
+        sprintCode: SPRINTS_FOR_UPDATE[0].sprintCode,
       })
     );
   });
@@ -73,13 +87,13 @@ describe('update', () => {
   it('Should return same record as created if not values are given to update', async () => {
     const [sprint] = await createSprints(fakeSprintFull());
 
-    const updatedSprint = await model.update(sprint.sprintCode, {});
+    const updatedSprint = await model.update(sprint.id, {});
 
     expect(updatedSprint).toEqual(sprint);
   });
 
   it('Should return undefined if sprint is not found', async () => {
-    const updatedSprint = await model.update('TP-1.1', {});
+    const updatedSprint = await model.update(999, {});
 
     expect(updatedSprint).toBeUndefined();
   });
@@ -89,13 +103,13 @@ describe('remove', () => {
   it('Should remove a sprint', async () => {
     const [sprint] = await createSprints(fakeSprintFull());
 
-    const removedSprint = await model.remove(sprint.sprintCode);
+    const removedSprint = await model.remove(sprint.id);
 
     expect(removedSprint).toEqual(sprintMatcher());
   });
 
   it('Should return undefined if sprint is not found', async () => {
-    const removedSprint = await model.remove('TP-1.1');
+    const removedSprint = await model.remove(999);
 
     expect(removedSprint).toBeUndefined();
   });

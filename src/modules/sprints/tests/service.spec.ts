@@ -2,7 +2,7 @@ import createTestDatabase from '@tests/utils/createTestDatabase';
 import { createFor, selectAllFor } from '@tests/utils/record';
 import buildService from '../service';
 import { fakeSprint, fakeSprintFull, sprintMatcher } from './utils/utils';
-import { INSERTABLE_SPRINTS, SPRINT_CODES_FOR_UPDATE } from './utils/constants';
+import { INSERTABLE_SPRINTS, SPRINTS_FOR_UPDATE } from './utils/constants';
 import { SprintAlreadyExists, SprintNotFound } from '../errors';
 
 const db = await createTestDatabase();
@@ -53,32 +53,42 @@ describe('createSprint', () => {
 describe('updateSprint', () => {
   it('Should throw a SprintNotFound', async () => {
     await expect(
-      service.updateSprint(INSERTABLE_SPRINTS[0].sprintCode, {})
-    ).rejects.toThrow(new SprintNotFound(INSERTABLE_SPRINTS[0].sprintCode));
+      service.updateSprint(SPRINTS_FOR_UPDATE[0].id, {})
+    ).rejects.toThrow(new SprintNotFound(SPRINTS_FOR_UPDATE[0].id));
   });
 
   it('Should return same record as created if not values are given to update', async () => {
     const [sprint] = await createSprints(fakeSprintFull());
 
-    const updatedSprint = await service.updateSprint(sprint.sprintCode, {});
+    const updatedSprint = await service.updateSprint(sprint.id, {});
 
     expect(updatedSprint).toEqual(sprint);
+  });
+
+  it('Should update sprint', async () => {
+    const [sprint] = await createSprints(fakeSprintFull());
+
+    const updatedSprint = await service.updateSprint(sprint.id, {
+      sprintCode: SPRINTS_FOR_UPDATE[0].sprintCode,
+    });
+
+    expect(updatedSprint).toEqual(
+      sprintMatcher({ sprintCode: SPRINTS_FOR_UPDATE[0].sprintCode })
+    );
   });
 });
 
 describe('remove', () => {
   it('Should throw a SprintNotFound', async () => {
-    await expect(
-      service.removeSprint(INSERTABLE_SPRINTS[0].sprintCode)
-    ).rejects.toThrow(new SprintNotFound(INSERTABLE_SPRINTS[0].sprintCode));
+    await expect(service.removeSprint(1)).rejects.toThrow(
+      new SprintNotFound(1)
+    );
   });
 
   it('Should remove sprint', async () => {
-    await createSprints(fakeSprint(INSERTABLE_SPRINTS[0]));
+    const [addedSprint] = await createSprints(fakeSprint());
 
-    const removedSprint = await service.removeSprint(
-      INSERTABLE_SPRINTS[0].sprintCode
-    );
+    const removedSprint = await service.removeSprint(addedSprint.id);
 
     expect(removedSprint).toEqual(sprintMatcher(INSERTABLE_SPRINTS[0]));
   });

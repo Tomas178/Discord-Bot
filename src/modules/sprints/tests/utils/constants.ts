@@ -2,7 +2,10 @@ type InsertableSprintRecord = {
   sprintCode: string;
 };
 
-type SprintCode = string;
+type UpdateableSprintRecord = {
+  id: number;
+  sprintCode: string;
+};
 
 export const INSERTABLE_SPRINTS: InsertableSprintRecord[] = [
   {
@@ -16,8 +19,17 @@ export const INSERTABLE_SPRINTS: InsertableSprintRecord[] = [
   },
 ];
 
-export const SPRINT_CODES_FOR_UPDATE: SprintCode[] = [
-  'WD-2.5',
-  'WD-3.4',
-  'AI-2.4',
+export const SPRINTS_FOR_UPDATE: UpdateableSprintRecord[] = [
+  {
+    id: 1,
+    sprintCode: 'WD-1.7',
+  },
+  {
+    id: 2,
+    sprintCode: 'WD-3.4',
+  },
+  {
+    id: 3,
+    sprintCode: 'AI-2.4',
+  },
 ];
