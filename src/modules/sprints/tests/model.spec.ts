@@ -1,8 +1,8 @@
 import createTestDatabase from '@tests/utils/createTestDatabase';
 import buildModel from '../model';
 import { createFor, selectAllFor } from '@tests/utils/record';
-import { INSERTABLE_SPRINTS, SPRINT_CODES_FOR_UPDATE } from './constants';
-import { fakeSprint, fakeSprintFull, sprintMatcher } from './utils';
+import { INSERTABLE_SPRINTS, SPRINT_CODES_FOR_UPDATE } from './utils/constants';
+import { fakeSprint, fakeSprintFull, sprintMatcher } from './utils/utils';
 
 const db = await createTestDatabase();
 const model = buildModel(db);
@@ -83,8 +83,6 @@ describe('update', () => {
 
     expect(updatedSprint).toBeUndefined();
   });
-
-  it('S');
 });
 
 describe('remove', () => {

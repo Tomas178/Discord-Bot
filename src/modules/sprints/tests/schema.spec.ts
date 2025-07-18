@@ -1,6 +1,6 @@
 import { omit } from 'lodash/fp';
 import { parse, parseId, parseInsertable, parseUpdateable } from '../schema';
-import { fakeSprintFull } from './utils';
+import { fakeSprintFull } from './utils/utils';
 
 describe('parse', () => {
   it('parses a valid record', () => {
