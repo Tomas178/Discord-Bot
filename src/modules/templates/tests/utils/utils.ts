@@ -18,7 +18,7 @@ export const templateMatcher = (
 
 export const fakeTemplateFull = (
   overrides: Partial<Insertable<Templates>> = {}
-): Insertable<Templates> => ({
+) => ({
   id: 2,
-  ...fakeTemplate(),
+  ...fakeTemplate(overrides),
 });
