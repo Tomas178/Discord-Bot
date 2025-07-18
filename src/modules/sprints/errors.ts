@@ -12,6 +12,6 @@ export class SprintAlreadyExists extends Error {
 
 export class SprintNotFound extends NotFound {
   constructor(id: number) {
-    super(`Sprint with id ${id} already exists`);
+    super(`Sprint with id ${id} not found`);
   }
 }
