@@ -14,12 +14,7 @@ const insertable = schema.omit({
   id: true,
 });
 
-const updateable = schema
-  .omit({
-    id: true,
-    sprintCode: true,
-  })
-  .partial();
+const updateable = insertable.partial();
 
 export const parse = (record: unknown) => schema.parse(record);
 export const parseId = (id: unknown) => schema.shape.id.parse(id);
