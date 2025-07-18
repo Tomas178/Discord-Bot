@@ -1,7 +1,9 @@
 import 'dotenv/config';
 import express from 'express';
+import { Client, GatewayIntentBits } from 'discord.js';
 import { Database } from './database';
 import jsonErrorHandler from './middleware/jsonErrors';
+import sprints from '@/modules/sprints/controller';
 
 export default function createApp(db: Database) {
   const { DISCORD_BOT_TOKEN } = process.env;
@@ -11,9 +13,21 @@ export default function createApp(db: Database) {
 
   const app = express();
 
+  const client = new Client({
+    intents: [
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent,
+    ],
+  });
+
   app.use(express.json());
 
+  app.use('/sprints', sprints(db));
+
   app.use(jsonErrorHandler);
+
+  client.login(DISCORD_BOT_TOKEN);
 
   return app;
 }
