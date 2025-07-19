@@ -4,6 +4,7 @@ import { Client, GatewayIntentBits } from 'discord.js';
 import { Database } from './database';
 import jsonErrorHandler from './middleware/jsonErrors';
 import sprints from '@/modules/sprints/controller';
+import templates from '@/modules/templates/controller';
 
 export default function createApp(db: Database) {
   const { DISCORD_BOT_TOKEN } = process.env;
@@ -17,13 +18,14 @@ export default function createApp(db: Database) {
     intents: [
       GatewayIntentBits.Guilds,
       GatewayIntentBits.GuildMessages,
-      GatewayIntentBits.MessageContent,
+      // GatewayIntentBits.MessageContent,
     ],
   });
 
   app.use(express.json());
 
   app.use('/sprints', sprints(db));
+  app.use('/templates', templates(db));
 
   app.use(jsonErrorHandler);
 
