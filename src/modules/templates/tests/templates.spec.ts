@@ -10,7 +10,6 @@ import {
 } from './utils/constants';
 import { fakeTemplate, fakeTemplateFull, templateMatcher } from './utils/utils';
 import { omit } from 'lodash/fp';
-import { template } from 'lodash';
 
 const db = await createTestDatabase();
 const app = createApp(db);
