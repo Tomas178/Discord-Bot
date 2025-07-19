@@ -70,13 +70,24 @@ describe('POST', () => {
 });
 
 describe('PATCH', () => {
-  it('Should return 400 if the sprintCode is missing', async () => {
+  it('Should return 400 if the sprintCode and sprintTitle are missing', async () => {
+    const { body } = await supertest(app)
+      .patch('/sprints?id=1')
+      .send(omit(['sprintCode', 'sprintTitle'], fakeSprint()))
+      .expect(StatusCodes.BAD_REQUEST);
+
+    expect(body.error.message).toMatch(
+      /sprintCode or sprintTitle is required!/i
+    );
+  });
+
+  it('Should return 404 if the sprintCode is missing', async () => {
     const { body } = await supertest(app)
       .patch('/sprints?id=1')
       .send(omit(['sprintCode'], fakeSprint()))
-      .expect(StatusCodes.BAD_REQUEST);
+      .expect(StatusCodes.NOT_FOUND);
 
-    expect(body.error.message).toMatch(/sprintCode/i);
+    expect(body.error.message).toMatch(/Sprint with id/i);
   });
 
   it('Should return 400 if the id is not given in query', async () => {
