@@ -15,16 +15,16 @@ afterEach(async () => db.deleteFrom('templates').execute());
 
 describe('findAll', () => {
   it('Should return all existing templates', async () => {
-    await createTemplates([
-      ...INSERTABLE_TEMPLATES.map((template) => fakeTemplate(template)),
-    ]);
+    await createTemplates(
+      INSERTABLE_TEMPLATES.map((template) => fakeTemplate(template))
+    );
 
     const templates = await model.findAll();
 
     expect(templates).toHaveLength(INSERTABLE_TEMPLATES.length);
-    expect(templates[0]).toEqual(templateMatcher(INSERTABLE_TEMPLATES[0]));
-    expect(templates[1]).toEqual(templateMatcher(INSERTABLE_TEMPLATES[1]));
-    expect(templates[2]).toEqual(templateMatcher(INSERTABLE_TEMPLATES[2]));
+    expect(templates).toEqual(
+      INSERTABLE_TEMPLATES.map((template) => templateMatcher(template))
+    );
   });
 });
 
@@ -41,6 +41,23 @@ describe('findById', () => {
     const templateInDatabase = await model.findById(template.id);
 
     expect(templateInDatabase).toEqual(template);
+  });
+});
+
+describe('findByTemplateMessage', () => {
+  it('Should return template', async () => {
+    const [template] = await createTemplates(fakeTemplate());
+
+    const templateInDatabase = await model.findByTemplateMessage(
+      template.templateMessage
+    );
+    expect(templateInDatabase).toEqual(template);
+  });
+
+  it('Should return undefined', async () => {
+    const templateInDatabase =
+      await model.findByTemplateMessage('non-existing');
+    expect(templateInDatabase).toBeUndefined();
   });
 });
 
