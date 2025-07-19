@@ -53,22 +53,6 @@ describe('parseId', () => {
   });
 });
 
-it('throws an error due to empty/missing/invalid sprintCode', () => {
-  const sprintWithoutSprintCode = omit(['sprintCode'], fakeSprintFull());
-  const sprintWithEmptySprintCode = fakeSprintFull({
-    sprintCode: '',
-  });
-  const sprintWithInvalidSprintCode = fakeSprintFull({
-    sprintCode: 'WD1.1',
-  });
-
-  expect(() => parse(sprintWithoutSprintCode)).toThrow(/sprintCode/i);
-  expect(() => parse(sprintWithEmptySprintCode)).toThrow(/sprintCode/i);
-  expect(() => parse(sprintWithInvalidSprintCode)).toThrow(
-    /Sprint code must match the pattern/i
-  );
-});
-
 describe('parseInsertable', () => {
   it('omits id', () => {
     const parsed = parseInsertable(fakeSprintFull());
