@@ -2,7 +2,7 @@ import supertest from 'supertest';
 import createTestDatabase from '@tests/utils/createTestDatabase';
 import createApp from '@/app';
 import { createFor } from '@tests/utils/record';
-import { fakeSprint, sprintMatcher } from './utils/utils';
+import { fakeSprint, fakeSprintFull, sprintMatcher } from './utils/utils';
 import { INSERTABLE_SPRINTS, SPRINTS_FOR_UPDATE } from './utils/constants';
 import { omit } from 'lodash/fp';
 import { StatusCodes } from 'http-status-codes';
@@ -26,21 +26,15 @@ describe('GET', () => {
   });
 
   it('Should return 200 and all sprints', async () => {
-    await createSprints([
-      fakeSprint(INSERTABLE_SPRINTS[0]),
-      fakeSprint(INSERTABLE_SPRINTS[1]),
-      fakeSprint(INSERTABLE_SPRINTS[2]),
-    ]);
+    await createSprints(INSERTABLE_SPRINTS.map((sprint) => fakeSprint(sprint)));
 
     const { body } = await supertest(app)
       .get('/sprints')
       .expect(StatusCodes.OK);
 
-    expect(body).toEqual([
-      sprintMatcher(INSERTABLE_SPRINTS[0]),
-      sprintMatcher(INSERTABLE_SPRINTS[1]),
-      sprintMatcher(INSERTABLE_SPRINTS[2]),
-    ]);
+    expect(body).toEqual(
+      INSERTABLE_SPRINTS.map((sprint) => sprintMatcher(sprint))
+    );
   });
 });
 
@@ -48,18 +42,18 @@ describe('POST', () => {
   it('Should return 400 if the sprintCode is missing', async () => {
     const { body } = await supertest(app)
       .post('/sprints')
-      .send(omit(['sprintCode'], fakeSprint(INSERTABLE_SPRINTS[0])))
+      .send(omit(['sprintCode'], fakeSprint()))
       .expect(StatusCodes.BAD_REQUEST);
 
     expect(body.error.message).toMatch(/sprintCode/i);
   });
 
   it('Should return 409 if the sprintCode already exists in the database', async () => {
-    createSprints(fakeSprint(INSERTABLE_SPRINTS[0]));
+    const [sprint] = await createSprints(fakeSprint());
 
     const { body } = await supertest(app)
       .post('/sprints')
-      .send(fakeSprint(INSERTABLE_SPRINTS[0]))
+      .send(sprint)
       .expect(StatusCodes.CONFLICT);
 
     expect(body.error.message).toMatch(/Sprint with sprintCode/i);
@@ -68,10 +62,10 @@ describe('POST', () => {
   it('Should return 201 and post sprint', async () => {
     const { body } = await supertest(app)
       .post('/sprints')
-      .send(fakeSprint(INSERTABLE_SPRINTS[0]))
+      .send(fakeSprint())
       .expect(StatusCodes.CREATED);
 
-    expect(body).toEqual(sprintMatcher(INSERTABLE_SPRINTS[0]));
+    expect(body).toEqual(sprintMatcher());
   });
 });
 
@@ -79,7 +73,7 @@ describe('PATCH', () => {
   it('Should return 400 if the sprintCode is missing', async () => {
     const { body } = await supertest(app)
       .patch('/sprints?id=1')
-      .send(omit(['sprintCode'], INSERTABLE_SPRINTS[0]))
+      .send(omit(['sprintCode'], fakeSprint()))
       .expect(StatusCodes.BAD_REQUEST);
 
     expect(body.error.message).toMatch(/sprintCode/i);
@@ -104,18 +98,18 @@ describe('PATCH', () => {
   });
 
   it('Should return 409 if the new sprintCode already exists', async () => {
-    const [sprint] = await createSprints(fakeSprint(SPRINTS_FOR_UPDATE[0]));
+    const [sprint] = await createSprints(fakeSprint());
 
     const { body } = await supertest(app)
       .patch(`/sprints?id=${sprint.id}`)
-      .send(SPRINTS_FOR_UPDATE[0])
+      .send(sprint)
       .expect(409);
 
     expect(body.error.message).toMatch(/Sprint with sprintCode/i);
   });
 
   it('Should return 200 and patch sprint', async () => {
-    const [sprint] = await createSprints(fakeSprint(INSERTABLE_SPRINTS[0]));
+    const [sprint] = await createSprints(fakeSprint());
 
     const { body } = await supertest(app)
       .patch(`/sprints?id=${sprint.id}`)
@@ -137,18 +131,16 @@ describe('DELETE', () => {
     expect(body.error.message).toMatch(/expected number/i);
   });
 
-  it('Should return 404 if sprint is missing', async () => {
-    await createSprints(fakeSprint(INSERTABLE_SPRINTS[0]));
-
+  it('Should return 404 if sprint if not found', async () => {
     const { body } = await supertest(app)
-      .delete('/sprints?id=2')
+      .delete('/sprints?id=1')
       .expect(StatusCodes.NOT_FOUND);
 
     expect(body.error.message).toMatch(/Sprint with id/i);
   });
 
   it('Should return 200 and delete the sprint', async () => {
-    const [sprint] = await createSprints(fakeSprint(INSERTABLE_SPRINTS[0]));
+    const [sprint] = await createSprints(fakeSprintFull());
 
     const { body } = await supertest(app)
       .delete(`/sprints?id=${sprint.id}`)

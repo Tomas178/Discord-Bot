@@ -15,18 +15,14 @@ afterEach(async () => await db.deleteFrom('sprints').execute());
 
 describe('findAll', () => {
   it('Should return all existing sprints', async () => {
-    await createSprints([
-      fakeSprint(INSERTABLE_SPRINTS[0]),
-      fakeSprint(INSERTABLE_SPRINTS[1]),
-      fakeSprint(INSERTABLE_SPRINTS[2]),
-    ]);
+    await createSprints(INSERTABLE_SPRINTS.map((sprint) => fakeSprint(sprint)));
 
     const sprints = await model.findAll();
 
-    expect(sprints).toHaveLength(3);
-    expect(sprints[0]).toEqual(sprintMatcher(INSERTABLE_SPRINTS[0]));
-    expect(sprints[1]).toEqual(sprintMatcher(INSERTABLE_SPRINTS[1]));
-    expect(sprints[2]).toEqual(sprintMatcher(INSERTABLE_SPRINTS[2]));
+    expect(sprints).toHaveLength(INSERTABLE_SPRINTS.length);
+    expect(sprints).toEqual(
+      INSERTABLE_SPRINTS.map((sprint) => sprintMatcher(sprint))
+    );
   });
 });
 
@@ -34,8 +30,8 @@ describe('findById', () => {
   it('Should return sprint by given id', async () => {
     const [sprint] = await createSprints(fakeSprintFull());
 
-    const sprintInDatabse = await model.findById(sprint.id);
-    expect(sprintInDatabse).toEqual(sprint);
+    const sprintInDatabase = await model.findById(sprint.id);
+    expect(sprintInDatabase).toEqual(sprint);
   });
 
   it('Should return undefined if sprint is not found', async () => {
@@ -48,8 +44,8 @@ describe('findBySprintCode', () => {
   it('Should return sprint by given sprintCode', async () => {
     const [sprint] = await createSprints(fakeSprintFull());
 
-    const sprintInDatabse = await model.findBySprintCode(sprint.sprintCode);
-    expect(sprintInDatabse).toEqual(sprint);
+    const sprintInDatabase = await model.findBySprintCode(sprint.sprintCode);
+    expect(sprintInDatabase).toEqual(sprint);
   });
 
   it('Should return undefined if sprint is not found', async () => {
@@ -60,9 +56,9 @@ describe('findBySprintCode', () => {
 
 describe('create', () => {
   it('Should add one sprint', async () => {
-    const sprint = await model.create(INSERTABLE_SPRINTS[0]);
+    const sprint = await model.create(fakeSprint());
 
-    expect(sprint).toEqual(sprintMatcher(INSERTABLE_SPRINTS[0]));
+    expect(sprint).toEqual(sprintMatcher());
 
     const sprintsInDatabase = await selectSprints();
     expect(sprintsInDatabase).toEqual([sprint]);

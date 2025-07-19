@@ -16,34 +16,30 @@ afterEach(async () => db.deleteFrom('sprints').execute());
 
 describe('findAll', () => {
   it('Should return all existing sprints', async () => {
-    await createSprints([
-      fakeSprint(INSERTABLE_SPRINTS[0]),
-      fakeSprint(INSERTABLE_SPRINTS[1]),
-      fakeSprint(INSERTABLE_SPRINTS[2]),
-    ]);
+    await createSprints(INSERTABLE_SPRINTS.map((sprint) => fakeSprint(sprint)));
 
     const sprints = await service.findAll();
 
-    expect(sprints).toHaveLength(3);
-    expect(sprints[0]).toEqual(sprintMatcher(INSERTABLE_SPRINTS[0]));
-    expect(sprints[1]).toEqual(sprintMatcher(INSERTABLE_SPRINTS[1]));
-    expect(sprints[2]).toEqual(sprintMatcher(INSERTABLE_SPRINTS[2]));
+    expect(sprints).toHaveLength(INSERTABLE_SPRINTS.length);
+    expect(sprints).toEqual(
+      INSERTABLE_SPRINTS.map((sprint) => sprintMatcher(sprint))
+    );
   });
 });
 
 describe('createSprint', () => {
   it('Should throw a SprintAlreadyExists', async () => {
-    createSprints(fakeSprint(INSERTABLE_SPRINTS[0]));
+    const [sprint] = await createSprints(fakeSprint());
 
-    await expect(service.createSprint(INSERTABLE_SPRINTS[0])).rejects.toThrow(
-      new SprintAlreadyExists(INSERTABLE_SPRINTS[0].sprintCode)
+    await expect(service.createSprint(sprint)).rejects.toThrow(
+      new SprintAlreadyExists(sprint.sprintCode)
     );
   });
 
   it('Should add one sprint', async () => {
-    const sprint = await service.createSprint(INSERTABLE_SPRINTS[0]);
+    const sprint = await service.createSprint(fakeSprint());
 
-    expect(sprint).toEqual(sprintMatcher(INSERTABLE_SPRINTS[0]));
+    expect(sprint).toEqual(sprintMatcher());
 
     const sprintsInDatabase = await selectSprints();
     expect(sprintsInDatabase).toEqual([sprint]);
@@ -57,7 +53,15 @@ describe('updateSprint', () => {
     ).rejects.toThrow(new SprintNotFound(SPRINTS_FOR_UPDATE[0].id));
   });
 
-  it('Should return same record as created if not values are given to update', async () => {
+  it('Should throw a SprintAlreadyExists', async () => {
+    const [sprint] = await createSprints(fakeSprintFull());
+
+    await expect(
+      service.updateSprint(sprint.id, { sprintCode: sprint.sprintCode })
+    ).rejects.toThrow(new SprintAlreadyExists(sprint.sprintCode));
+  });
+
+  it('Should return same record as created if no values are given to update', async () => {
     const [sprint] = await createSprints(fakeSprintFull());
 
     const updatedSprint = await service.updateSprint(sprint.id, {});
@@ -90,6 +94,6 @@ describe('remove', () => {
 
     const removedSprint = await service.removeSprint(addedSprint.id);
 
-    expect(removedSprint).toEqual(sprintMatcher(INSERTABLE_SPRINTS[0]));
+    expect(removedSprint).toEqual(addedSprint);
   });
 });
