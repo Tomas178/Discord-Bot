@@ -33,6 +33,7 @@ const schema = z.object({
 const insertable = schema.omit({
   id: true,
   createdAt: true,
+  message: true,
 });
 
 export const parse = (record: unknown) => schema.parse(record);
