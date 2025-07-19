@@ -5,8 +5,8 @@ import { keys } from './schema';
 const TABLE = 'templates';
 type Row = Templates;
 type RowWithoutId = Omit<Row, 'id'>;
-type RowInsert = Insertable<RowWithoutId>;
-type RowUpdate = Updateable<RowWithoutId>;
+export type RowInsert = Insertable<RowWithoutId>;
+export type RowUpdate = Updateable<RowWithoutId>;
 type RowSelect = Selectable<Row>;
 
 export default (db: Database) => ({
@@ -15,6 +15,15 @@ export default (db: Database) => ({
 
   findById: async (id: number): Promise<RowSelect | undefined> =>
     db.selectFrom(TABLE).selectAll().where('id', '=', id).executeTakeFirst(),
+
+  findByTemplateMessage: async (
+    templateMessage: string
+  ): Promise<RowSelect | undefined> =>
+    db
+      .selectFrom(TABLE)
+      .selectAll()
+      .where('templateMessage', '=', templateMessage)
+      .executeTakeFirst(),
 
   create: async (record: RowInsert): Promise<RowSelect | undefined> =>
     db.insertInto(TABLE).values(record).returning(keys).executeTakeFirst(),
