@@ -5,7 +5,6 @@ import { INSERTABLE_TEMPLATES, TEMPLATES_FOR_UPDATE } from './utils/constants';
 import { fakeTemplate, fakeTemplateFull, templateMatcher } from './utils/utils';
 import buildService from '../service';
 import { TemplateAlreadyExists, TemplateNotFound } from '../errors';
-import model from '../model';
 
 const db = await createTestDatabase();
 const service = buildService(db);
