@@ -15,13 +15,14 @@ type UpdateableTemplateRecord = {
 
 export const INSERTABLE_TEMPLATES: insertableTemplateRecord[] = [
   {
-    templateMessage: 'You nailed it! 💪',
+    templateMessage: '{username} You nailed it! 💪',
   },
   {
-    templateMessage: 'You did it! I knew you could. 🤗',
+    templateMessage: '{sprintTitle} You did it! I knew you could. 🤗',
   },
   {
-    templateMessage: "Oh my gosh, that's excellent! 🤩",
+    templateMessage:
+      "Oh my gosh, {username} completed {sprintTitle} that's excellent! 🤩",
   },
 ];
 

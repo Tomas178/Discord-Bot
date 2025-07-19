@@ -54,6 +54,20 @@ describe('findBySprintCode', () => {
   });
 });
 
+describe('getSprintTitle', () => {
+  it('Should return sprintTitle', async () => {
+    const [sprint] = await createSprints(fakeSprintFull());
+
+    const { sprintTitle } = await model.getSprintTitle(sprint.sprintCode);
+
+    expect(sprintTitle).toEqual(sprint.sprintTitle);
+  });
+
+  it('Should throw an error when sprintCode does not exists', async () => {
+    await expect(model.getSprintTitle('TP-1.1')).rejects.toThrow(/No result/i);
+  });
+});
+
 describe('create', () => {
   it('Should add one sprint', async () => {
     const sprint = await model.create(fakeSprint());

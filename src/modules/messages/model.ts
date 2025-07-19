@@ -5,7 +5,7 @@ import { keys } from './schema';
 const TABLE = 'messages';
 type Row = Messages;
 type RowWithoutIdAndCreatedAt = Omit<Row, 'id' | 'createdAt'>;
-type RowInsert = Insertable<RowWithoutIdAndCreatedAt>;
+export type RowInsert = Insertable<RowWithoutIdAndCreatedAt>;
 type RowSelect = Selectable<RowWithoutIdAndCreatedAt>;
 
 export default (db: Database) => ({

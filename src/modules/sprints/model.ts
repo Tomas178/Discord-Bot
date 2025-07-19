@@ -8,6 +8,9 @@ type RowWithoutId = Omit<Row, 'id'>;
 export type RowInsert = Insertable<RowWithoutId>;
 export type RowUpdate = Updateable<RowWithoutId>;
 type RowSelect = Selectable<Row>;
+type rowSprintTitle = {
+  sprintTitle: string;
+};
 
 export default (db: Database) => ({
   findAll: async (): Promise<RowSelect[]> =>
@@ -24,6 +27,13 @@ export default (db: Database) => ({
       .selectAll()
       .where('sprintCode', '=', sprintCode)
       .executeTakeFirst(),
+
+  getSprintTitle: async (sprintCode: string): Promise<rowSprintTitle> =>
+    db
+      .selectFrom(TABLE)
+      .select('sprintTitle')
+      .where('sprintCode', '=', sprintCode)
+      .executeTakeFirstOrThrow(),
 
   create: async (record: RowInsert): Promise<RowSelect | undefined> =>
     db.insertInto(TABLE).values(record).returning(keys).executeTakeFirst(),
