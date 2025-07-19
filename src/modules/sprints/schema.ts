@@ -1,9 +1,10 @@
 import { Sprints } from '@/database';
 import z from 'zod';
-
-const sprintCodeRegex = new RegExp(/^[A-Z]+-\d+\.\d+$/);
-const sprintCodeErrorMessage =
-  'Sprint code must match the pattern: Course-Module.Sprint (e.g., WD-1.1) ';
+import {
+  ERROR_EMPTY_SPRINT_TITLE,
+  sprintCodeErrorMessage,
+  sprintCodeRegex,
+} from './tests/utils/constants';
 
 type Record = Sprints;
 const schema = z.object({
@@ -11,6 +12,7 @@ const schema = z.object({
   sprintCode: z.string().regex(sprintCodeRegex, {
     message: sprintCodeErrorMessage,
   }),
+  sprintTitle: z.string().nonempty(ERROR_EMPTY_SPRINT_TITLE),
 });
 
 const insertable = schema.omit({

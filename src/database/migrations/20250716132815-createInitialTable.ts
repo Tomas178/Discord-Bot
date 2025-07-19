@@ -6,6 +6,7 @@ export async function up(db: Kysely<SqliteDatabase>) {
     .ifNotExists()
     .addColumn('id', 'integer', (c) => c.primaryKey().notNull().autoIncrement())
     .addColumn('sprint_code', 'text', (c) => c.notNull().unique())
+    .addColumn('sprint_title', 'text', (c) => c.notNull())
     .execute();
 
   await db.schema

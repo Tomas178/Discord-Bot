@@ -113,7 +113,10 @@ describe('PATCH', () => {
 
     const { body } = await supertest(app)
       .patch(`/sprints?id=${sprint.id}`)
-      .send({ sprintCode: SPRINTS_FOR_UPDATE[0].sprintCode })
+      .send({
+        sprintCode: SPRINTS_FOR_UPDATE[0].sprintCode,
+        sprintTitle: SPRINTS_FOR_UPDATE[0].sprintTitle,
+      })
       .expect(StatusCodes.OK);
 
     expect(body).toEqual(

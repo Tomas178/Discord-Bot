@@ -25,12 +25,13 @@ export default (db: Database) => {
         const id = schema.parseId(req.query.id);
         const body = schema.parseUpdateable(req.body);
 
-        if (!body.sprintCode) {
+        if (!body.sprintCode || !body.sprintTitle) {
           throw new BadRequest('sprintCode is required.');
         }
 
         return service.updateSprint(id, {
           sprintCode: body.sprintCode,
+          sprintTitle: body.sprintTitle,
         });
       }, StatusCodes.OK)
     )

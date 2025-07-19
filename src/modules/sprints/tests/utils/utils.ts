@@ -5,6 +5,7 @@ export const fakeSprint = (
   overrides: Partial<Insertable<Sprints>> = {}
 ): Insertable<Sprints> => ({
   sprintCode: 'WD-1.1',
+  sprintTitle: 'Python programming',
   ...overrides,
 });
 
