@@ -45,3 +45,7 @@ export const parseUsername = (username: unknown) =>
   schema.shape.username.parse(username);
 
 export const parseInsertable = (record: unknown) => insertable.parse(record);
+
+export const keys: (keyof Record)[] = Object.keys(
+  schema.shape
+) as (keyof z.infer<typeof schema>)[];

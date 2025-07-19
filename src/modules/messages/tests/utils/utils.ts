@@ -16,7 +16,7 @@ export const messageMatcher = (
   id: expect.any(Number),
   createdAt: expect.any(String),
   ...overrides,
-  ...fakeMessage(),
+  ...fakeMessage(overrides),
 });
 
 export const fakeMessageFull = (
