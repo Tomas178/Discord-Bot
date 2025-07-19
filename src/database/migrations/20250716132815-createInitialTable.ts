@@ -21,7 +21,7 @@ export async function up(db: Kysely<SqliteDatabase>) {
     .ifNotExists()
     .addColumn('id', 'integer', (c) => c.primaryKey().autoIncrement().notNull())
     .addColumn('message', 'text', (c) => c.notNull())
-    .addColumn('sprintCode', 'text', (c) => c.notNull())
+    .addColumn('sprint_code', 'text', (c) => c.notNull())
     .addColumn('username', 'text', (c) => c.notNull())
     .addColumn('created_at', 'datetime', (c) =>
       c.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
