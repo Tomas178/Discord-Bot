@@ -5,6 +5,10 @@ import buildTemplatesModel from '@/modules/templates/model';
 import NotFound from '@/utils/errors/NotFound';
 import { formatTemplateMessage } from './utils/formatTemplateMessage';
 import { ERROR_NO_SPRINT, ERROR_NO_TEMPLATES } from './utils/constants';
+import {
+  MessagesBySprintCodeNotFound,
+  MessagesByUsernameNotFound,
+} from './errors';
 
 export default (db: Database) => {
   const messages = buildMessagesModel(db);
@@ -14,11 +18,23 @@ export default (db: Database) => {
   return {
     findAll: async () => messages.findAll(),
 
-    findByUsername: async (username: string) =>
-      messages.findByUsername(username),
+    findByUsername: async (username: string) => {
+      const messagesInDatabase = await messages.findByUsername(username);
+      if (messagesInDatabase.length === 0) {
+        throw new MessagesByUsernameNotFound(username);
+      }
 
-    findBySprintCode: async (sprintCode: string) =>
-      messages.findBySprintCode(sprintCode),
+      return messagesInDatabase;
+    },
+
+    findBySprintCode: async (sprintCode: string) => {
+      const messagesInDatabase = await messages.findBySprintCode(sprintCode);
+      if (messagesInDatabase.length === 0) {
+        throw new MessagesBySprintCodeNotFound(sprintCode);
+      }
+
+      return messagesInDatabase;
+    },
 
     formMessage: async (username: string, sprintCode: string) => {
       const allTemplates = await templates.findAll();

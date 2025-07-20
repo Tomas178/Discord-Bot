@@ -9,6 +9,10 @@ import { fakeSprint } from '@/modules/sprints/tests/utils/utils';
 import { formatTemplateMessage } from '../utils/formatTemplateMessage';
 import NotFound from '@/utils/errors/NotFound';
 import { ERROR_NO_SPRINT, ERROR_NO_TEMPLATES } from '../utils/constants';
+import {
+  MessagesBySprintCodeNotFound,
+  MessagesByUsernameNotFound,
+} from '../errors';
 
 const db = await createTestDatabase();
 const service = buildService(db);
@@ -44,6 +48,14 @@ describe('findAll', () => {
 });
 
 describe('findByUsername', () => {
+  it('Should throw a MessagesByUsernameNotFound', async () => {
+    const username = 'username';
+
+    await expect(service.findByUsername(username)).rejects.toThrow(
+      new MessagesByUsernameNotFound(username)
+    );
+  });
+
   it('Should return one message', async () => {
     await createMessages(
       INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
@@ -83,6 +95,14 @@ describe('findByUsername', () => {
 });
 
 describe('findBySprintCode', () => {
+  it('Should throw a MessagesBySprintCodeNotFound', async () => {
+    const sprintCode = 'WD-1.1';
+
+    await expect(service.findBySprintCode(sprintCode)).rejects.toThrow(
+      new MessagesBySprintCodeNotFound(sprintCode)
+    );
+  });
+
   it('Should return one message', async () => {
     await createMessages(
       INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
