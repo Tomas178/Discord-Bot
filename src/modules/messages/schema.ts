@@ -27,6 +27,7 @@ const schema = z.object({
     .string()
     .nonempty(ERROR_EMPTY_USERNAME)
     .max(MAX_LENGTH_USERNAME, ERROR_TOO_LONG_USERNAME),
+  gifUrl: z.url(),
   createdAt: z.iso.datetime(),
 });
 

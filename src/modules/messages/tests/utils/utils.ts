@@ -6,6 +6,7 @@ export const fakeMessage = (
 ): Insertable<Messages> => ({
   message: 'Congrats Tomas!',
   sprintCode: 'WD-1.1',
+  gifUrl: 'https://giphy.com/fake.gif',
   username: 'username',
   ...overrides,
 });
@@ -15,7 +16,6 @@ export const messageMatcher = (
 ) => ({
   id: expect.any(Number),
   createdAt: expect.any(String),
-  ...overrides,
   ...fakeMessage(overrides),
 });
 
