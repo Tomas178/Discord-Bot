@@ -6,9 +6,9 @@ import { fakeMessage, messageMatcher } from './utils/utils';
 import { fakeTemplate } from '@/modules/templates/tests/utils/utils';
 import { INSERTABLE_TEMPLATES } from '@/modules/templates/tests/utils/constants';
 import { fakeSprint } from '@/modules/sprints/tests/utils/utils';
-import { ERROR_NO_SPRINT, ERROR_NO_TEMPLATES } from './utils/constants';
 import { formatTemplateMessage } from '../utils/formatTemplateMessage';
 import NotFound from '@/utils/errors/NotFound';
+import { ERROR_NO_SPRINT, ERROR_NO_TEMPLATES } from '../utils/constants';
 
 const db = await createTestDatabase();
 const service = buildService(db);

@@ -5,7 +5,7 @@ import { jsonRoute, unsupportedRoute } from '@/utils/middleware';
 import * as schema from './schema';
 import { StatusCodes } from 'http-status-codes';
 import BadRequest from '@/utils/errors/BadRequest';
-import { ERROR_MISSING_TEMPLATE_MESSAGE } from './tests/utils/constants';
+import { ERROR_MISSING_TEMPLATE_MESSAGE } from './utils/constants';
 
 export default (db: Database) => {
   const router = Router();

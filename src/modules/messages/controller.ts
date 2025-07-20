@@ -3,7 +3,6 @@ import { Router, Request } from 'express';
 import buildService from './service';
 import { jsonRoute } from '@/utils/middleware';
 import * as schema from './schema';
-import { parseInsertable } from '../templates/schema';
 import { StatusCodes } from 'http-status-codes';
 
 type PostRequest = {

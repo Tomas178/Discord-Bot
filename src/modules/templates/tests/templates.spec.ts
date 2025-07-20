@@ -3,13 +3,10 @@ import createTestDatabase from '@tests/utils/createTestDatabase';
 import { createFor } from '@tests/utils/record';
 import { StatusCodes } from 'http-status-codes';
 import supertest from 'supertest';
-import {
-  ERROR_MISSING_TEMPLATE_MESSAGE,
-  INSERTABLE_TEMPLATES,
-  TEMPLATES_FOR_UPDATE,
-} from './utils/constants';
+import { INSERTABLE_TEMPLATES, TEMPLATES_FOR_UPDATE } from './utils/constants';
 import { fakeTemplate, fakeTemplateFull, templateMatcher } from './utils/utils';
 import { omit } from 'lodash/fp';
+import { ERROR_MISSING_TEMPLATE_MESSAGE } from '../utils/constants';
 
 const db = await createTestDatabase();
 const app = createApp(db);

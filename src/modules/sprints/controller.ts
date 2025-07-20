@@ -5,6 +5,7 @@ import { jsonRoute, unsupportedRoute } from '@/utils/middleware';
 import * as schema from './schema';
 import { StatusCodes } from 'http-status-codes';
 import BadRequest from '@/utils/errors/BadRequest';
+import { ERROR_PATCH_REQUEST } from './utils/constants';
 
 export default (db: Database) => {
   const router = Router();
@@ -26,7 +27,7 @@ export default (db: Database) => {
         const body = schema.parseUpdateable(req.body);
 
         if (!body.sprintCode && !body.sprintTitle) {
-          throw new BadRequest('sprintCode or sprintTitle is required!');
+          throw new BadRequest(ERROR_PATCH_REQUEST);
         }
 
         return service.updateSprint(id, {

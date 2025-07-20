@@ -1,10 +1,10 @@
 import { Templates } from '@/database';
-import z, { record } from 'zod';
+import z from 'zod';
 import {
   ERROR_EMPTY_TEMPLATE_MESSAGE,
   ERROR_TOO_LONG_TEMPLATE_MESSAGE,
   MAX_LENGTH,
-} from './tests/utils/constants';
+} from './utils/constants';
 
 type Record = Templates;
 const schema = z.object({

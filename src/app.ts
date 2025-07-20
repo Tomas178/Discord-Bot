@@ -5,6 +5,7 @@ import { Database } from './database';
 import jsonErrorHandler from './middleware/jsonErrors';
 import sprints from '@/modules/sprints/controller';
 import templates from '@/modules/templates/controller';
+import messages from '@/modules/messages/controller';
 
 export default function createApp(db: Database) {
   const { DISCORD_BOT_TOKEN } = process.env;
@@ -26,6 +27,7 @@ export default function createApp(db: Database) {
 
   app.use('/sprints', sprints(db));
   app.use('/templates', templates(db));
+  app.use('/messages', messages(db));
 
   app.use(jsonErrorHandler);
 

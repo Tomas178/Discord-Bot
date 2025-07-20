@@ -6,6 +6,7 @@ import { fakeSprint, fakeSprintFull, sprintMatcher } from './utils/utils';
 import { INSERTABLE_SPRINTS, SPRINTS_FOR_UPDATE } from './utils/constants';
 import { omit } from 'lodash/fp';
 import { StatusCodes } from 'http-status-codes';
+import { ERROR_PATCH_REQUEST } from '../utils/constants';
 
 const db = await createTestDatabase();
 const app = createApp(db);
@@ -76,9 +77,7 @@ describe('PATCH', () => {
       .send(omit(['sprintCode', 'sprintTitle'], fakeSprint()))
       .expect(StatusCodes.BAD_REQUEST);
 
-    expect(body.error.message).toMatch(
-      /sprintCode or sprintTitle is required!/i
-    );
+    expect(body.error.message).toEqual(ERROR_PATCH_REQUEST);
   });
 
   it('Should return 404 if the sprintCode is missing', async () => {

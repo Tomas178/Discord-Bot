@@ -14,8 +14,7 @@ import {
   ERROR_TOO_LONG_USERNAME,
   MAX_LENGTH_MESSAGE,
   MAX_LENGTH_USERNAME,
-} from './utils/constants';
-import { date } from 'zod';
+} from '../utils/constants';
 
 describe('parse', () => {
   it('Parses a valid record', async () => {

@@ -5,7 +5,7 @@ import {
   ERROR_EMPTY_TEMPLATE_MESSAGE,
   ERROR_TOO_LONG_TEMPLATE_MESSAGE,
   MAX_LENGTH,
-} from './utils/constants';
+} from '../utils/constants';
 
 describe('parse', () => {
   it('Should parse a valid record', () => {

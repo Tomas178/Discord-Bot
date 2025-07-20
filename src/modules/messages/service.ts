@@ -4,7 +4,7 @@ import buildSprintsModel from '@/modules/sprints/model';
 import buildTemplatesModel from '@/modules/templates/model';
 import NotFound from '@/utils/errors/NotFound';
 import { formatTemplateMessage } from './utils/formatTemplateMessage';
-import { ERROR_NO_SPRINT, ERROR_NO_TEMPLATES } from './tests/utils/constants';
+import { ERROR_NO_SPRINT, ERROR_NO_TEMPLATES } from './utils/constants';
 
 export default (db: Database) => {
   const messages = buildMessagesModel(db);

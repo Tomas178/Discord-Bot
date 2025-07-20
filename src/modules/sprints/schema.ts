@@ -4,7 +4,7 @@ import {
   ERROR_EMPTY_SPRINT_TITLE,
   sprintCodeErrorMessage,
   sprintCodeRegex,
-} from './tests/utils/constants';
+} from './utils/constants';
 
 type Record = Sprints;
 const schema = z.object({

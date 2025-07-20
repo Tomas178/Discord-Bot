@@ -4,12 +4,13 @@ import createApp from '@/app';
 import { createFor } from '@tests/utils/record';
 import supertest from 'supertest';
 import { StatusCodes } from 'http-status-codes';
-import { ERROR_NO_SPRINT, INSERTABLE_MESSAGES } from './utils/constants';
+import { INSERTABLE_MESSAGES } from './utils/constants';
 import { fakeMessage, messageMatcher } from './utils/utils';
 import { omit } from 'lodash/fp';
 import { fakeTemplate } from '@/modules/templates/tests/utils/utils';
 import { fakeSprint } from '@/modules/sprints/tests/utils/utils';
 import { formatTemplateMessage } from '../utils/formatTemplateMessage';
+import { ERROR_NO_SPRINT } from '../utils/constants';
 
 const db = await createTestDatabase();
 const app = createApp(db);

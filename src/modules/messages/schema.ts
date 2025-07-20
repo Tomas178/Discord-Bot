@@ -2,12 +2,12 @@ import { Messages } from '@/database';
 import z from 'zod';
 import {
   ERROR_EMPTY_MESSAGE,
-  MAX_LENGTH_MESSAGE,
-  ERROR_TOO_LONG_MESSAGE,
   ERROR_EMPTY_USERNAME,
-  MAX_LENGTH_USERNAME,
+  ERROR_TOO_LONG_MESSAGE,
   ERROR_TOO_LONG_USERNAME,
-} from './tests/utils/constants';
+  MAX_LENGTH_MESSAGE,
+  MAX_LENGTH_USERNAME,
+} from './utils/constants';
 
 const sprintCodeRegex = new RegExp(/^[A-Z]+-\d+\.\d+$/);
 const sprintCodeErrorMessage =
