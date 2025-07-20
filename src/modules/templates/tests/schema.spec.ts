@@ -3,6 +3,7 @@ import { parse, parseId, parseInsertable, parseUpdateable } from '../schema';
 import { fakeTemplateFull } from './utils/utils';
 import {
   ERROR_EMPTY_TEMPLATE_MESSAGE,
+  ERROR_INVALID_TEMPLATE_MESSAGE,
   ERROR_TOO_LONG_TEMPLATE_MESSAGE,
   MAX_LENGTH,
 } from '../utils/constants';
@@ -20,7 +21,7 @@ describe('parse', () => {
     });
 
     expect(() => parse(templateWithEmptyTemplateMessage)).toThrow(
-      ERROR_EMPTY_TEMPLATE_MESSAGE
+      ERROR_INVALID_TEMPLATE_MESSAGE
     );
   });
 
@@ -42,6 +43,16 @@ describe('parse', () => {
 
     expect(() => parse(templateWithTooLongTemplateMessage)).toThrow(
       ERROR_TOO_LONG_TEMPLATE_MESSAGE
+    );
+  });
+
+  it('Should throw an error due to invalid templateMessage', () => {
+    const invalidTemplateMessage = fakeTemplateFull({
+      templateMessage: '{username} Has just completed {sprintTitle}!',
+    });
+
+    expect(() => parse(invalidTemplateMessage)).toThrow(
+      ERROR_INVALID_TEMPLATE_MESSAGE
     );
   });
 });

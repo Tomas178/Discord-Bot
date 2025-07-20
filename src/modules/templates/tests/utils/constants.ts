@@ -1,4 +1,4 @@
-type insertableTemplateRecord = {
+type InsertableTemplateRecord = {
   templateMessage: string;
 };
 
@@ -7,31 +7,35 @@ type UpdateableTemplateRecord = {
   templateMessage: string;
 };
 
-export const INSERTABLE_TEMPLATES: insertableTemplateRecord[] = [
+export const INSERTABLE_TEMPLATES: InsertableTemplateRecord[] = [
   {
-    templateMessage: '{username} You nailed it! 💪',
-  },
-  {
-    templateMessage: '{sprintTitle} You did it! I knew you could. 🤗',
+    templateMessage:
+      '{username} has just completed {sprintTitle}!\nYou nailed it! 💪',
   },
   {
     templateMessage:
-      "Oh my gosh, {username} completed {sprintTitle} that's excellent! 🤩",
+      '{username} has just completed {sprintTitle}!\nYou did it! I knew you could. 🤗',
+  },
+  {
+    templateMessage:
+      "{username} has just completed {sprintTitle}!\nOh my gosh, that's excellent! 🤩",
   },
 ];
 
 export const TEMPLATES_FOR_UPDATE: UpdateableTemplateRecord[] = [
   {
     id: 1,
-    templateMessage: 'You did it! I knew you could. 🤗',
+    templateMessage:
+      '{username} has just completed {sprintTitle}!\nYou did it! I knew you could. 🤗',
   },
   {
     id: 2,
     templateMessage:
-      'Applause, applause, applause! 👏 Congrats on your hard-earned success!',
+      '{username} has just completed {sprintTitle}!\nApplause, applause, applause! 👏 Congrats on your hard-earned success!',
   },
   {
     id: 3,
-    templateMessage: 'We believe in you! And unicorns...🦄 But mostly you.',
+    templateMessage:
+      '{username} has just completed {sprintTitle}!\nWe believe in you! And unicorns...🦄 But mostly you.',
   },
 ];

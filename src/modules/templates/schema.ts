@@ -1,9 +1,10 @@
 import { Templates } from '@/database';
 import z from 'zod';
 import {
-  ERROR_EMPTY_TEMPLATE_MESSAGE,
+  ERROR_INVALID_TEMPLATE_MESSAGE,
   ERROR_TOO_LONG_TEMPLATE_MESSAGE,
   MAX_LENGTH,
+  TEMPLATE_REGEX,
 } from './utils/constants';
 
 type Record = Templates;
@@ -11,7 +12,7 @@ const schema = z.object({
   id: z.coerce.number().int().positive(),
   templateMessage: z
     .string()
-    .nonempty(ERROR_EMPTY_TEMPLATE_MESSAGE)
+    .regex(TEMPLATE_REGEX, ERROR_INVALID_TEMPLATE_MESSAGE)
     .max(MAX_LENGTH, ERROR_TOO_LONG_TEMPLATE_MESSAGE),
 });
 

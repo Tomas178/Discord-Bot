@@ -4,7 +4,8 @@ import { Insertable } from 'kysely';
 export const fakeTemplate = (
   overrides: Partial<Insertable<Templates>> = {}
 ): Insertable<Templates> => ({
-  templateMessage: 'You nailed it! 💪',
+  templateMessage:
+    '{username} has just completed {sprintTitle}!\nYou nailed it! 💪',
   ...overrides,
 });
 
