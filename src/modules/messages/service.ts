@@ -3,7 +3,7 @@ import buildMessagesModel, { RowInsert } from './model';
 import buildSprintsModel from '@/modules/sprints/model';
 import buildTemplatesModel from '@/modules/templates/model';
 import NotFound from '@/utils/errors/NotFound';
-import { formatTemplateMessage } from './utils/formatTemplateMessage';
+import { formatTemplateMessage } from './utils/formatTemplateMessage/formatTemplateMessage';
 import { ERROR_NO_SPRINT, ERROR_NO_TEMPLATES } from './utils/constants';
 import {
   MessagesBySprintCodeNotFound,
