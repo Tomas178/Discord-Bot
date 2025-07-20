@@ -142,6 +142,14 @@ describe('findBySprintCode', () => {
 });
 
 describe('formMessage', () => {
+  beforeAll(() => {
+    vi.mock('../utils/giphyClient/giphyClient', () => ({
+      fetchRandomCelebrationGif: vi.fn(() =>
+        Promise.resolve('https://giphy.com/fake.gif')
+      ),
+    }));
+  });
+
   it('Should throw a NotFound if no templates exist', async () => {
     await expect(service.formMessage('', 'TP-1.1')).rejects.toThrow(
       new NotFound(ERROR_NO_TEMPLATES)
@@ -163,7 +171,8 @@ describe('formMessage', () => {
 
     const message = await service.formMessage('', sprint.sprintCode);
 
-    expect(message).toEqual(template.templateMessage);
+    expect(message.message).toEqual(template.templateMessage);
+    expect(message.gifUrl).toBe('https://giphy.com/fake.gif');
   });
 
   it('Should form message which has only {username}', async () => {
@@ -187,7 +196,8 @@ describe('formMessage', () => {
       sprint.sprintCode
     );
 
-    expect(formedMessage).toEqual(formedTemplateMessage);
+    expect(formedMessage.message).toEqual(formedTemplateMessage);
+    expect(formedMessage.gifUrl).toBe('https://giphy.com/fake.gif');
   });
 
   it('Should form message which has only {sprintTitle}', async () => {
@@ -210,7 +220,8 @@ describe('formMessage', () => {
 
     const formedMessage = await service.formMessage(username, sprintCode);
 
-    expect(formedMessage).toEqual(formedTemplateMessage);
+    expect(formedMessage.message).toEqual(formedTemplateMessage);
+    expect(formedMessage.gifUrl).toBe('https://giphy.com/fake.gif');
   });
 
   it('Should form message which has {username} and {sprintTitle}', async () => {
@@ -234,7 +245,8 @@ describe('formMessage', () => {
 
     const formedMessage = await service.formMessage(username, sprintCode);
 
-    expect(formedMessage).toEqual(formedTemplateMessage);
+    expect(formedMessage.message).toEqual(formedTemplateMessage);
+    expect(formedMessage.gifUrl).toBe('https://giphy.com/fake.gif');
   });
 });
 

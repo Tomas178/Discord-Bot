@@ -9,6 +9,7 @@ import {
   MessagesBySprintCodeNotFound,
   MessagesByUsernameNotFound,
 } from './errors';
+import { fetchRandomCelebrationGif } from './utils/giphyClient/giphyClient';
 
 export default (db: Database) => {
   const messages = buildMessagesModel(db);
@@ -52,12 +53,14 @@ export default (db: Database) => {
 
       const { sprintTitle } = await sprints.getSprintTitle(sprintCode);
 
-      const formedMessage = formatTemplateMessage(templateMessage, {
+      const message = formatTemplateMessage(templateMessage, {
         username,
         sprintTitle,
       });
 
-      return formedMessage;
+      const gifUrl = await fetchRandomCelebrationGif();
+
+      return { message, gifUrl };
     },
 
     createMessage: async (data: RowInsert) => messages.create(data),
