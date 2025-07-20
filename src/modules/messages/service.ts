@@ -14,6 +14,12 @@ export default (db: Database) => {
   return {
     findAll: async () => messages.findAll(),
 
+    findByUsername: async (username: string) =>
+      messages.findByUsername(username),
+
+    findBySprintCode: async (sprintCode: string) =>
+      messages.findBySprintCode(sprintCode),
+
     formMessage: async (username: string, sprintCode: string) => {
       const allTemplates = await templates.findAll();
       if (allTemplates.length === 0) {

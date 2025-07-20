@@ -43,6 +43,84 @@ describe('findAll', () => {
   });
 });
 
+describe('findByUsername', () => {
+  it('Should return one message', async () => {
+    await createMessages(
+      INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
+    );
+
+    const messages = await service.findByUsername(
+      INSERTABLE_MESSAGES[0].username
+    );
+
+    expect(messages).toHaveLength(1);
+    expect(messages).toEqual([messageMatcher(INSERTABLE_MESSAGES[0])]);
+  });
+
+  it('Should return all messages', async () => {
+    await createMessages(
+      INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
+    );
+
+    await createMessages(
+      fakeMessage({
+        username: INSERTABLE_MESSAGES[1].username,
+      })
+    );
+
+    const messages = await service.findByUsername(
+      INSERTABLE_MESSAGES[1].username
+    );
+
+    expect(messages).toHaveLength(2);
+    expect(messages[0]).toEqual(messageMatcher(INSERTABLE_MESSAGES[1]));
+    expect(messages[1]).toEqual(
+      messageMatcher({
+        username: INSERTABLE_MESSAGES[1].username,
+      })
+    );
+  });
+});
+
+describe('findBySprintCode', () => {
+  it('Should return one message', async () => {
+    await createMessages(
+      INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
+    );
+
+    const messages = await service.findBySprintCode(
+      INSERTABLE_MESSAGES[0].sprintCode
+    );
+
+    expect(messages).toHaveLength(1);
+    expect(messages).toEqual([messageMatcher(INSERTABLE_MESSAGES[0])]);
+  });
+
+  it('Should return all messages', async () => {
+    await createMessages(
+      INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
+    );
+
+    await createMessages(
+      fakeMessage({
+        sprintCode: INSERTABLE_MESSAGES[1].sprintCode,
+      })
+    );
+
+    const messages = await service.findBySprintCode(
+      INSERTABLE_MESSAGES[1].sprintCode
+    );
+
+    expect(messages).toHaveLength(2);
+    expect(messages[0]).toEqual(messageMatcher(INSERTABLE_MESSAGES[1]));
+    expect(messages[1]).toEqual(
+      messageMatcher({
+        sprintCode: INSERTABLE_MESSAGES[1].sprintCode,
+      })
+    );
+  });
+});
+
 describe('formMessage', () => {
   it('Should throw a NotFound if no templates exist', async () => {
     await expect(service.formMessage('', 'TP-1.1')).rejects.toThrow(
