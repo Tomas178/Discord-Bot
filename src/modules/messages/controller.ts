@@ -10,13 +10,32 @@ type PostRequest = {
   sprintCode: string;
 };
 
+type GetRequest = {
+  username?: string;
+  sprintCode?: string;
+};
+
 export default (db: Database) => {
   const router = Router();
   const service = buildService(db);
 
   router
     .route('/')
-    .get(jsonRoute(service.findAll))
+    .get(
+      jsonRoute(async (req: Request<{}, {}, {}, GetRequest>) => {
+        if (req.query.username) {
+          const username = schema.parseUsername(req.query.username);
+          return service.findByUsername(username);
+        }
+
+        if (req.query.sprintCode) {
+          const sprintCode = schema.parseSprintCode(req.query.sprintCode);
+          return service.findBySprintCode(sprintCode);
+        }
+
+        return service.findAll();
+      })
+    )
     .post(
       jsonRoute(async (req: Request<{}, {}, PostRequest>) => {
         const { username, sprintCode } = schema.parseInsertable(req.body);

@@ -28,27 +28,73 @@ afterEach(async () => {
 });
 
 describe('GET', () => {
-  it('Should return 200 and an empty array when there are no messages', async () => {
-    const { body } = await supertest(app)
-      .get('/messages')
-      .expect(StatusCodes.OK);
+  describe('No query', () => {
+    it('Should return 200 and an empty array when there are no messages', async () => {
+      const { body } = await supertest(app)
+        .get('/messages')
+        .expect(StatusCodes.OK);
 
-    expect(body).toEqual([]);
+      expect(body).toEqual([]);
+    });
+
+    it('Should return 200 and all messages', async () => {
+      await createMessages(
+        INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
+      );
+
+      const { body } = await supertest(app)
+        .get('/messages')
+        .expect(StatusCodes.OK);
+
+      expect(body).toHaveLength(INSERTABLE_MESSAGES.length);
+      expect(body).toEqual(
+        INSERTABLE_MESSAGES.map((message) => messageMatcher(message))
+      );
+    });
   });
 
-  it('Should return 200 and all messages', async () => {
-    await createMessages(
-      INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
-    );
+  describe('Query for username', () => {
+    it('Should return 404 if messages for the given username are not found', async () => {
+      const { body } = await supertest(app)
+        .get('/messages?username=Tomas')
+        .expect(StatusCodes.NOT_FOUND);
 
-    const { body } = await supertest(app)
-      .get('/messages')
-      .expect(StatusCodes.OK);
+      expect(body.error.message).toMatch(/Messages with username/);
+    });
 
-    expect(body).toHaveLength(INSERTABLE_MESSAGES.length);
-    expect(body).toEqual(
-      INSERTABLE_MESSAGES.map((message) => messageMatcher(message))
-    );
+    it('Should return 200 and messages with given username', async () => {
+      await createMessages(
+        INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
+      );
+
+      const { body } = await supertest(app)
+        .get(`/messages?username=${INSERTABLE_MESSAGES[0].username}`)
+        .expect(StatusCodes.OK);
+
+      expect(body).toEqual([messageMatcher(INSERTABLE_MESSAGES[0])]);
+    });
+  });
+
+  describe('Query for sprintCode', () => {
+    it('Should return 404 if messages for the given sprintCode are not found', async () => {
+      const { body } = await supertest(app)
+        .get('/messages?sprintCode=WD-1.1')
+        .expect(StatusCodes.NOT_FOUND);
+
+      expect(body.error.message).toMatch(/Messages with sprintCode/);
+    });
+
+    it('Should return 200 and messages with given sprintCode', async () => {
+      await createMessages(
+        INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
+      );
+
+      const { body } = await supertest(app)
+        .get(`/messages?sprintCode=${INSERTABLE_MESSAGES[0].sprintCode}`)
+        .expect(StatusCodes.OK);
+
+      expect(body).toEqual([messageMatcher(INSERTABLE_MESSAGES[0])]);
+    });
   });
 });
 
