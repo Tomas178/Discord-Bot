@@ -30,10 +30,9 @@ const schema = z.object({
   createdAt: z.iso.datetime(),
 });
 
-const insertable = schema.omit({
-  id: true,
-  createdAt: true,
-  message: true,
+const insertable = schema.pick({
+  sprintCode: true,
+  username: true,
 });
 
 export const parse = (record: unknown) => schema.parse(record);
