@@ -35,6 +35,96 @@ describe('findAll', () => {
   });
 });
 
+describe('findByUsername', () => {
+  it('Should return empty array', async () => {
+    const messages = await model.findByUsername('username');
+
+    expect(messages).toEqual([]);
+  });
+
+  it('Should return one message', async () => {
+    await createMessages(
+      INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
+    );
+
+    const messages = await model.findByUsername(
+      INSERTABLE_MESSAGES[0].username
+    );
+
+    expect(messages).toHaveLength(1);
+    expect(messages).toEqual([messageMatcher(INSERTABLE_MESSAGES[0])]);
+  });
+
+  it('Should return all messages', async () => {
+    await createMessages(
+      INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
+    );
+
+    await createMessages(
+      fakeMessage({
+        username: INSERTABLE_MESSAGES[1].username,
+      })
+    );
+
+    const messages = await model.findByUsername(
+      INSERTABLE_MESSAGES[1].username
+    );
+
+    expect(messages).toHaveLength(2);
+    expect(messages[0]).toEqual(messageMatcher(INSERTABLE_MESSAGES[1]));
+    expect(messages[1]).toEqual(
+      messageMatcher({
+        username: INSERTABLE_MESSAGES[1].username,
+      })
+    );
+  });
+});
+
+describe('findBySprintCode', () => {
+  it('Should return empty array', async () => {
+    const messages = await model.findBySprintCode('WD-1.1');
+
+    expect(messages).toEqual([]);
+  });
+
+  it('Should return one message', async () => {
+    await createMessages(
+      INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
+    );
+
+    const messages = await model.findBySprintCode(
+      INSERTABLE_MESSAGES[0].sprintCode
+    );
+
+    expect(messages).toHaveLength(1);
+    expect(messages).toEqual([messageMatcher(INSERTABLE_MESSAGES[0])]);
+  });
+
+  it('Should return all messages', async () => {
+    await createMessages(
+      INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
+    );
+
+    await createMessages(
+      fakeMessage({
+        sprintCode: INSERTABLE_MESSAGES[1].sprintCode,
+      })
+    );
+
+    const messages = await model.findBySprintCode(
+      INSERTABLE_MESSAGES[1].sprintCode
+    );
+
+    expect(messages).toHaveLength(2);
+    expect(messages[0]).toEqual(messageMatcher(INSERTABLE_MESSAGES[1]));
+    expect(messages[1]).toEqual(
+      messageMatcher({
+        sprintCode: INSERTABLE_MESSAGES[1].sprintCode,
+      })
+    );
+  });
+});
+
 describe('create', () => {
   it('Should add one message', async () => {
     const message = await model.create(fakeMessage());
