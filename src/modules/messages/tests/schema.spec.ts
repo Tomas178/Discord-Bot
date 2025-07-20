@@ -4,6 +4,7 @@ import {
   parseId,
   parseInsertable,
   parseMessage,
+  parseSprintCode,
   parseUsername,
 } from '../schema';
 import { fakeMessageFull } from './utils/utils';
@@ -126,6 +127,30 @@ describe('parseUsername', () => {
     const username = 'a'.repeat(MAX_LENGTH_USERNAME + 1);
 
     expect(() => parseUsername(username)).toThrow(ERROR_TOO_LONG_USERNAME);
+  });
+});
+
+describe('parseSprintCode', () => {
+  it('Throws an error due to empty sprintCode', () => {
+    const sprintCode = '';
+
+    expect(() => parseSprintCode(sprintCode)).toThrow(
+      /Sprint code must match the pattern/i
+    );
+  });
+
+  it('Throws an error due to invalid sprintCode', () => {
+    const sprintCode = 'TP-1.';
+
+    expect(() => parseSprintCode(sprintCode)).toThrow(
+      /Sprint code must match the pattern/i
+    );
+  });
+
+  it('Parses a valid sprintCode', () => {
+    const sprintCode = 'WD-1.1';
+
+    expect(parseSprintCode(sprintCode)).toEqual(sprintCode);
   });
 });
 

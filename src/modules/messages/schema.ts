@@ -44,6 +44,9 @@ export const parseMessage = (message: unknown) =>
 export const parseUsername = (username: unknown) =>
   schema.shape.username.parse(username);
 
+export const parseSprintCode = (sprintCode: unknown) =>
+  schema.shape.sprintCode.parse(sprintCode);
+
 export const parseInsertable = (record: unknown) => insertable.parse(record);
 
 export const keys: (keyof Record)[] = Object.keys(
