@@ -11,6 +11,7 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
 
 export interface Messages {
   createdAt: Generated<string>;
+  gifUrl: Generated<string>;
   id: Generated<number>;
   message: string;
   sprintCode: string;
