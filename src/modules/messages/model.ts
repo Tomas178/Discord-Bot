@@ -6,7 +6,7 @@ const TABLE = 'messages';
 type Row = Messages;
 type RowWithoutIdAndCreatedAt = Omit<Row, 'id' | 'createdAt'>;
 export type RowInsert = Insertable<RowWithoutIdAndCreatedAt>;
-type RowSelect = Selectable<RowWithoutIdAndCreatedAt>;
+type RowSelect = Selectable<Row>;
 
 export default (db: Database) => ({
   findAll: async (): Promise<RowSelect[]> =>
