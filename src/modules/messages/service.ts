@@ -8,7 +8,7 @@ import { ERROR_NO_SPRINT, ERROR_NO_TEMPLATES } from './utils/constants';
 import {
   MessagesBySprintCodeNotFound,
   MessagesByUsernameNotFound,
-} from './errors';
+} from './utils/errors';
 import { fetchRandomCelebrationGif } from './utils/giphyClient/giphyClient';
 
 export default (db: Database) => {

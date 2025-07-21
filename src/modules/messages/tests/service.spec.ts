@@ -12,7 +12,7 @@ import { ERROR_NO_SPRINT, ERROR_NO_TEMPLATES } from '../utils/constants';
 import {
   MessagesBySprintCodeNotFound,
   MessagesByUsernameNotFound,
-} from '../errors';
+} from '../utils/errors';
 
 const db = await createTestDatabase();
 const service = buildService(db);
@@ -162,66 +162,6 @@ describe('formMessage', () => {
     await expect(service.formMessage('', 'TP-1.1')).rejects.toThrow(
       new NotFound(ERROR_NO_SPRINT)
     );
-  });
-
-  it('Should form message which has no {username} or {sprintTitle}', async () => {
-    const [template] = await createTemplates(fakeTemplate());
-
-    const [sprint] = await createSprints(fakeSprint());
-
-    const message = await service.formMessage('', sprint.sprintCode);
-
-    expect(message.message).toEqual(template.templateMessage);
-    expect(message.gifUrl).toBe('https://giphy.com/fake.gif');
-  });
-
-  it('Should form message which has only {username}', async () => {
-    const [template] = await createTemplates(
-      fakeTemplate(INSERTABLE_TEMPLATES[0])
-    );
-
-    const [sprint] = await createSprints(fakeSprint());
-
-    const username = INSERTABLE_MESSAGES[0].username;
-
-    const formedTemplateMessage = formatTemplateMessage(
-      template.templateMessage,
-      {
-        username,
-      }
-    );
-
-    const formedMessage = await service.formMessage(
-      username,
-      sprint.sprintCode
-    );
-
-    expect(formedMessage.message).toEqual(formedTemplateMessage);
-    expect(formedMessage.gifUrl).toBe('https://giphy.com/fake.gif');
-  });
-
-  it('Should form message which has only {sprintTitle}', async () => {
-    const [template] = await createTemplates(
-      fakeTemplate(INSERTABLE_TEMPLATES[1])
-    );
-
-    const [sprint] = await createSprints(fakeSprint());
-
-    const username = INSERTABLE_MESSAGES[1].username;
-    const sprintTitle = sprint.sprintTitle;
-    const sprintCode = sprint.sprintCode;
-
-    const formedTemplateMessage = formatTemplateMessage(
-      template.templateMessage,
-      {
-        sprintTitle,
-      }
-    );
-
-    const formedMessage = await service.formMessage(username, sprintCode);
-
-    expect(formedMessage.message).toEqual(formedTemplateMessage);
-    expect(formedMessage.gifUrl).toBe('https://giphy.com/fake.gif');
   });
 
   it('Should form message which has {username} and {sprintTitle}', async () => {

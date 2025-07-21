@@ -128,7 +128,7 @@ describe('findBySprintCode', () => {
 describe('create', () => {
   it('Should add one message', async () => {
     const message = await model.create(fakeMessage());
-    console.log(message);
+
     expect(message).toEqual(messageMatcher());
 
     const messagesInDatabase = await selectMessages();
