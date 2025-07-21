@@ -33,7 +33,7 @@ export default async function (
       const embed = new EmbedBuilder().setImage(gifUrl).setColor(EMBED_COLOR);
 
       await textChannel.send({ content: finalMessage, embeds: [embed] });
-    } catch (err) {
+    } catch (_err) {
       throw new Error(ERROR_FAILED_TO_SEND_TO_DISCORD_CHANNEL);
     }
   }

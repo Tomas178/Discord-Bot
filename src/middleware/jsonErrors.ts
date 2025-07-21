@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import type { ErrorRequestHandler } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { ZodError } from 'zod';

@@ -24,7 +24,6 @@ export default [
       'no-console': 'warn',
       'prettier/prettier': 'error',
       '@typescript-eslint/no-empty-object-type': 'off',
-      'no-console': 'off',
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {

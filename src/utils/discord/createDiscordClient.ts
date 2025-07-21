@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Client, GatewayIntentBits } from 'discord.js';
 import 'dotenv/config';
 import { ERROR_NO_BOT_TOKEN } from './constants';

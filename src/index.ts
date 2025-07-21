@@ -13,5 +13,6 @@ const database = createDatabase(DATABASE_URL);
 const app = createApp(database);
 
 app.listen(PORT, () => {
+  /* eslint-disable no-console */
   console.log(`Server is running at http://localhost:${PORT}`);
 });

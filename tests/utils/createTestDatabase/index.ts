@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { CamelCasePlugin, Kysely, SqliteDialect } from 'kysely';
 import ModuleMigrationProvider from './ModuleMigrationProvider';
 import SQLite from 'better-sqlite3';
