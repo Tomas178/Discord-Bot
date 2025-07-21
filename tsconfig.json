@@ -1,6 +1,6 @@
 {
   "extends": "@tsconfig/node22/tsconfig.json",
-  "include": ["**/*.ts", ".eslintrc.cjs"],
+  "include": ["**/*.ts", "eslint.config.ts"],
 
   "compilerOptions": {
     "baseUrl": ".",
