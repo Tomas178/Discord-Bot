@@ -2,7 +2,6 @@ import { omit } from 'lodash/fp';
 import { parse, parseId, parseInsertable, parseUpdateable } from '../schema';
 import { fakeTemplateFull } from './utils/utils';
 import {
-  ERROR_EMPTY_TEMPLATE_MESSAGE,
   ERROR_INVALID_TEMPLATE_MESSAGE,
   ERROR_TOO_LONG_TEMPLATE_MESSAGE,
   MAX_LENGTH,
