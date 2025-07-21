@@ -1,6 +1,6 @@
 import { Database } from '@/database';
 import buildModel, { RowInsert, RowUpdate } from './model';
-import { TemplateAlreadyExists, TemplateNotFound } from './errors';
+import { TemplateAlreadyExists, TemplateNotFound } from './utils/errors';
 
 export default (db: Database) => {
   const templates = buildModel(db);

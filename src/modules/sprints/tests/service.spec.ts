@@ -3,7 +3,7 @@ import { createFor, selectAllFor } from '@tests/utils/record';
 import buildService from '../service';
 import { fakeSprint, fakeSprintFull, sprintMatcher } from './utils/utils';
 import { INSERTABLE_SPRINTS, SPRINTS_FOR_UPDATE } from './utils/constants';
-import { SprintAlreadyExists, SprintNotFound } from '../errors';
+import { SprintAlreadyExists, SprintNotFound } from '../utils/errors';
 
 const db = await createTestDatabase();
 const service = buildService(db);

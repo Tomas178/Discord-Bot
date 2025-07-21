@@ -1,6 +1,6 @@
 import { Database } from '@/database';
 import buildModel, { RowInsert, RowUpdate } from './model';
-import { SprintAlreadyExists, SprintNotFound } from './errors';
+import { SprintAlreadyExists, SprintNotFound } from './utils/errors';
 
 export default (db: Database) => {
   const sprints = buildModel(db);
