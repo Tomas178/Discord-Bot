@@ -1,9 +1,12 @@
 import { Database } from '@/database';
 import { Router, Request } from 'express';
 import buildService from './service';
-import { jsonRoute } from '@/utils/middleware';
+import { jsonRoute, unsupportedRoute } from '@/utils/middleware';
 import * as schema from './schema';
 import { StatusCodes } from 'http-status-codes';
+import { Client } from 'discord.js';
+import sendMessageToDiscordServer from '@/utils/discord/sendMessageToDiscordServer';
+import { ERROR_INSERTING_MESSAGE_TO_DATABASE } from './utils/constants';
 
 type PostRequest = {
   username: string;
@@ -12,10 +15,10 @@ type PostRequest = {
 
 type GetRequest = {
   username?: string;
-  sprintCode?: string;
+  sprint?: string;
 };
 
-export default (db: Database) => {
+export default (db: Database, discordClient: Client) => {
   const router = Router();
   const service = buildService(db);
 
@@ -28,8 +31,8 @@ export default (db: Database) => {
           return service.findByUsername(username);
         }
 
-        if (req.query.sprintCode) {
-          const sprintCode = schema.parseSprintCode(req.query.sprintCode);
+        if (req.query.sprint) {
+          const sprintCode = schema.parseSprintCode(req.query.sprint);
           return service.findBySprintCode(sprintCode);
         }
 
@@ -39,17 +42,41 @@ export default (db: Database) => {
     .post(
       jsonRoute(async (req: Request<{}, {}, PostRequest>) => {
         const { username, sprintCode } = schema.parseInsertable(req.body);
-        const message = await service.formMessage(username, sprintCode);
+
+        let message: string;
+        let gifUrl: string;
+
+        try {
+          const result = await service.formMessage(username, sprintCode);
+          message = result.message;
+          gifUrl = result.gifUrl;
+        } catch (error) {
+          throw error;
+        }
 
         const formedMessage = {
           message,
           username,
           sprintCode,
+          gifUrl,
         };
 
-        return service.createMessage(formedMessage);
+        await sendMessageToDiscordServer(
+          message,
+          gifUrl,
+          username,
+          discordClient
+        );
+
+        try {
+          return await service.createMessage(formedMessage);
+        } catch (_error) {
+          throw new Error(ERROR_INSERTING_MESSAGE_TO_DATABASE);
+        }
       }, StatusCodes.CREATED)
-    );
+    )
+
+    .all(unsupportedRoute);
 
   return router;
 };

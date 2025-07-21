@@ -19,3 +19,6 @@ export const GIPHY_SEARCH_CONFIG = {
   type: 'gifs',
 } as const;
 export const GIPHY_SEARCH_TITLE = 'celebration';
+
+export const ERROR_INSERTING_MESSAGE_TO_DATABASE =
+  'Message sent to Discord, but could not be stored in the database!';

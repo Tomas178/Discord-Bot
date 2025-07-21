@@ -1,5 +1,14 @@
+vi.mock('@/modules/messages/utils/giphyClient/giphyClient', async () => ({
+  fetchRandomCelebrationGif: vi
+    .fn()
+    .mockResolvedValue('https://giphy.com/fake.gif'),
+}));
+
+vi.mock('@/utils/discord/sendMessageToDiscordServer', () => ({
+  default: vi.fn().mockResolvedValue(undefined),
+}));
+
 import createTestDatabase from '@tests/utils/createTestDatabase';
-import buildService from '../service';
 import createApp from '@/app';
 import { createFor } from '@tests/utils/record';
 import supertest from 'supertest';
@@ -9,8 +18,12 @@ import { fakeMessage, messageMatcher } from './utils/utils';
 import { omit } from 'lodash/fp';
 import { fakeTemplate } from '@/modules/templates/tests/utils/utils';
 import { fakeSprint } from '@/modules/sprints/tests/utils/utils';
-import { formatTemplateMessage } from '../utils/formatTemplateMessage';
-import { ERROR_NO_SPRINT } from '../utils/constants';
+import { formatTemplateMessage } from '../utils/formatTemplateMessage/formatTemplateMessage';
+import {
+  ERROR_INSERTING_MESSAGE_TO_DATABASE,
+  ERROR_NO_SPRINT,
+  FAKE_GIPHY_URL,
+} from '../utils/constants';
 
 const db = await createTestDatabase();
 const app = createApp(db);
@@ -75,22 +88,22 @@ describe('GET', () => {
     });
   });
 
-  describe('Query for sprintCode', () => {
-    it('Should return 404 if messages for the given sprintCode are not found', async () => {
+  describe('Query for sprint', () => {
+    it('Should return 404 if messages for the given sprint are not found', async () => {
       const { body } = await supertest(app)
-        .get('/messages?sprintCode=WD-1.1')
+        .get('/messages?sprint=WD-1.1')
         .expect(StatusCodes.NOT_FOUND);
 
       expect(body.error.message).toMatch(/Messages with sprintCode/);
     });
 
-    it('Should return 200 and messages with given sprintCode', async () => {
+    it('Should return 200 and messages with given sprint', async () => {
       await createMessages(
         INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
       );
 
       const { body } = await supertest(app)
-        .get(`/messages?sprintCode=${INSERTABLE_MESSAGES[0].sprintCode}`)
+        .get(`/messages?sprint=${INSERTABLE_MESSAGES[0].sprintCode}`)
         .expect(StatusCodes.OK);
 
       expect(body).toEqual([messageMatcher(INSERTABLE_MESSAGES[0])]);
@@ -99,6 +112,41 @@ describe('GET', () => {
 });
 
 describe('POST', () => {
+  it('Should return 500 in case of insertion to database error', async () => {
+    vi.resetModules();
+
+    vi.doMock('../service', () => {
+      return {
+        default: () => ({
+          createMessage: vi.fn().mockRejectedValue(new Error()),
+          formMessage: vi.fn().mockResolvedValue({
+            message: 'message',
+            gifUrl: FAKE_GIPHY_URL,
+          }),
+        }),
+      };
+    });
+
+    const createApp = (await import('@/app')).default;
+
+    const db = await createTestDatabase();
+    const app = createApp(db);
+
+    const [sprint] = await createSprints(fakeSprint());
+
+    const messageObject = {
+      username: 'name',
+      sprintCode: sprint.sprintCode,
+    };
+
+    const { body } = await supertest(app)
+      .post('/messages')
+      .send(messageObject)
+      .expect(StatusCodes.INTERNAL_SERVER_ERROR);
+
+    expect(body.error.message).toBe(ERROR_INSERTING_MESSAGE_TO_DATABASE);
+  });
+
   it('Should return 400 if the username is missing', async () => {
     const { body } = await supertest(app)
       .post('/messages')
@@ -143,10 +191,10 @@ describe('POST', () => {
       .send(messageObject)
       .expect(StatusCodes.CREATED);
 
-    const formedMessage = formatTemplateMessage(
-      template.templateMessage,
-      messageObject
-    );
+    const formedMessage = formatTemplateMessage(template.templateMessage, {
+      username: 'name',
+      sprintTitle: 'Python programming',
+    });
 
     const formedMessageObject = {
       message: formedMessage,
