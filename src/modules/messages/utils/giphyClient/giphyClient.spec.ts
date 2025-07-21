@@ -1,10 +1,18 @@
-import { fetchRandomCelebrationGif, GIPHY_SEARCH_CONFIG } from './giphyClient';
+import { GiphyFetch } from '@giphy/js-fetch-api';
+import { GifNotFound } from '../errors';
+import {
+  ERROR_FETCHING_GIF,
+  FAKE_GIPHY_URL,
+  GIPHY_SEARCH_CONFIG,
+  GIPHY_SEARCH_TITLE,
+} from '../constants';
+import { fetchRandomCelebrationGif } from './giphyClient';
 
-describe('fetchRandomCelebrationGif with DI', () => {
+describe('fetchRandomCelebrationGif', () => {
   const mockSearch = vi.fn();
   const mockGiphyFetch = {
     search: mockSearch,
-  };
+  } as unknown as GiphyFetch;
 
   beforeEach(() => {
     mockSearch.mockReset();
@@ -14,26 +22,47 @@ describe('fetchRandomCelebrationGif with DI', () => {
     const mockGif = {
       images: {
         fixed_height: {
-          url: 'https://giphy.com/fake.gif',
+          url: FAKE_GIPHY_URL,
         },
       },
     };
 
     mockSearch.mockResolvedValue({ data: [mockGif] });
 
-    const result = await fetchRandomCelebrationGif(mockGiphyFetch as any);
-    expect(result).toBe('https://giphy.com/fake.gif');
+    const result = await fetchRandomCelebrationGif(mockGiphyFetch);
+    expect(result).toBe(FAKE_GIPHY_URL);
     expect(mockSearch).toHaveBeenCalledTimes(1);
-    expect(mockSearch).toHaveBeenCalledWith('celebration', GIPHY_SEARCH_CONFIG);
+    expect(mockSearch).toHaveBeenCalledWith(
+      GIPHY_SEARCH_TITLE,
+      GIPHY_SEARCH_CONFIG
+    );
   });
 
-  it('throws an error if no GIFs are found', async () => {
+  it('Throws an error if no GIFs are found', async () => {
     mockSearch.mockResolvedValue({ data: [] });
 
-    await expect(
-      fetchRandomCelebrationGif(mockGiphyFetch as any)
-    ).rejects.toThrow('No celebration GIFs found');
+    await expect(fetchRandomCelebrationGif(mockGiphyFetch)).rejects.toThrow(
+      new GifNotFound()
+    );
+
     expect(mockSearch).toHaveBeenCalledTimes(1);
-    expect(mockSearch).toHaveBeenCalledWith('celebration', GIPHY_SEARCH_CONFIG);
+    expect(mockSearch).toHaveBeenCalledWith(
+      GIPHY_SEARCH_TITLE,
+      GIPHY_SEARCH_CONFIG
+    );
+  });
+
+  it('Throws an internal server error', async () => {
+    mockSearch.mockRejectedValue(new Error());
+
+    await expect(fetchRandomCelebrationGif(mockGiphyFetch)).rejects.toThrow(
+      new Error(ERROR_FETCHING_GIF)
+    );
+
+    expect(mockSearch).toHaveBeenCalledOnce();
+    expect(mockSearch).toHaveBeenCalledWith(
+      GIPHY_SEARCH_TITLE,
+      GIPHY_SEARCH_CONFIG
+    );
   });
 });
