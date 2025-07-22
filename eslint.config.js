@@ -9,7 +9,11 @@ export default [
 
     languageOptions: {
       parser: tsparser,
-      sourceType: 'module',
+      parserOptions: {
+        project: './tsconfig.eslint.json',
+        tsconfigRootDir: new URL('.', import.meta.url).pathname,
+        sourceType: 'module',
+      },
     },
 
     plugins: {
