@@ -8,6 +8,13 @@ export default (db: Database) => {
   return {
     findAll: async () => templates.findAll(),
 
+    findById: async (id: number) => {
+      const template = await templates.findById(id);
+      if (!template) throw new TemplateNotFound(id);
+
+      return templates.findById(id);
+    },
+
     createTemplate: async (data: RowInsert) => {
       const existing = await templates.findByTemplateMessage(
         data.templateMessage

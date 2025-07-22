@@ -42,5 +42,35 @@ export default (db: Database) => {
     )
     .all(unsupportedRoute);
 
+  router
+    .route('/:id')
+    .get(
+      jsonRoute(async (req) => {
+        const id = schema.parseId(req.params.id);
+
+        return service.findById(id);
+      })
+    )
+    .patch(
+      jsonRoute(async (req) => {
+        const id = schema.parseId(req.params.id);
+        const body = schema.parseUpdateable(req.body);
+
+        if (!body.templateMessage) {
+          throw new BadRequest(ERROR_MISSING_TEMPLATE_MESSAGE);
+        }
+
+        return service.updateTemplate(id, body);
+      })
+    )
+    .delete(
+      jsonRoute(async (req) => {
+        const id = schema.parseId(req.params.id);
+
+        return service.removeTemplate(id);
+      })
+    )
+    .all(unsupportedRoute);
+
   return router;
 };

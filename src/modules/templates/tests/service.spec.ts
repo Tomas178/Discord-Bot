@@ -30,6 +30,22 @@ describe('findAll', () => {
   });
 });
 
+describe('findById', () => {
+  it('Should throw a TemplateNotFound', async () => {
+    await expect(service.findById(999)).rejects.toThrow(
+      new TemplateNotFound(999)
+    );
+  });
+
+  it('Should return a tempplate', async () => {
+    const [template] = await createTemplates(fakeTemplate());
+
+    const templateInDatabase = await service.findById(template.id);
+
+    expect(templateInDatabase).toStrictEqual(template);
+  });
+});
+
 describe('createTemplate', () => {
   it('Should throw a TemplateAlreadyExists', async () => {
     const [createdTemplate] = await createTemplates(fakeTemplate());
