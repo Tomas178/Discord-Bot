@@ -1,6 +1,7 @@
 import { omit } from 'lodash/fp';
 import { parse, parseId, parseInsertable, parseUpdateable } from '../schema';
 import { fakeSprintFull } from './utils/utils';
+import { ERROR_INVALID_SPRINTCODE } from '../utils/constants';
 
 describe('parse', () => {
   it('parses a valid record', () => {
@@ -28,7 +29,7 @@ describe('parse', () => {
       sprintCode: 'WD1.1',
     });
     expect(() => parse(sprintWithInvalidSprintCode)).toThrow(
-      /Sprint code must match the pattern/i
+      ERROR_INVALID_SPRINTCODE
     );
   });
 });

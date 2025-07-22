@@ -2,7 +2,7 @@ import { Sprints } from '@/database';
 import z from 'zod';
 import {
   ERROR_EMPTY_SPRINT_TITLE,
-  sprintCodeErrorMessage,
+  ERROR_INVALID_SPRINTCODE,
   sprintCodeRegex,
 } from './utils/constants';
 
@@ -10,7 +10,7 @@ type Record = Sprints;
 const schema = z.object({
   id: z.coerce.number().int().positive(),
   sprintCode: z.string().regex(sprintCodeRegex, {
-    message: sprintCodeErrorMessage,
+    message: ERROR_INVALID_SPRINTCODE,
   }),
   sprintTitle: z.string().nonempty(ERROR_EMPTY_SPRINT_TITLE),
 });
