@@ -1,5 +1,11 @@
 import NotFound from '@/utils/errors/NotFound';
 
+export class MessageByIdNotFound extends NotFound {
+  constructor(id: number) {
+    super(`Message with id: ${id} not found!`);
+  }
+}
+
 export class MessagesByUsernameNotFound extends NotFound {
   constructor(username: string) {
     super(`Messages with username: ${username} not found!`);
