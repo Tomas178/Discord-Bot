@@ -8,6 +8,14 @@ export default (db: Database) => {
   return {
     findAll: async () => sprints.findAll(),
 
+    findById: async (id: number) => {
+      const sprint = await sprints.findById(id);
+
+      if (!sprint) throw new SprintNotFound(id);
+
+      return sprint;
+    },
+
     createSprint: async (data: RowInsert) => {
       const existing = await sprints.findBySprintCode(data.sprintCode);
       if (existing) {

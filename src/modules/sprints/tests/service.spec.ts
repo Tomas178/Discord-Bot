@@ -27,6 +27,22 @@ describe('findAll', () => {
   });
 });
 
+describe('findById', () => {
+  it('Should throw an error SprintNotFound', async () => {
+    await expect(service.findById(999)).rejects.toThrow(
+      new SprintNotFound(999)
+    );
+  });
+
+  it('Should return sprint by given id', async () => {
+    const [createdSprint] = await createSprints(fakeSprint());
+
+    const sprintInDatabase = await service.findById(createdSprint.id);
+
+    expect(sprintInDatabase).toStrictEqual(createdSprint);
+  });
+});
+
 describe('createSprint', () => {
   it('Should throw a SprintAlreadyExists', async () => {
     const [sprint] = await createSprints(fakeSprint());

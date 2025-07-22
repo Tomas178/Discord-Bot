@@ -17,159 +17,289 @@ afterAll(() => db.destroy());
 
 afterEach(async () => await db.deleteFrom('sprints').execute());
 
-describe('GET', () => {
-  it('Should return 200 and an empty array when there are no sprints', async () => {
-    const { body } = await supertest(app)
-      .get('/sprints')
-      .expect(StatusCodes.OK);
+describe('Route /sprints', () => {
+  describe('GET', () => {
+    it('Should return 200 and an empty array when there are no sprints', async () => {
+      const { body } = await supertest(app)
+        .get('/sprints')
+        .expect(StatusCodes.OK);
 
-    expect(body).toEqual([]);
+      expect(body).toEqual([]);
+    });
+
+    it('Should return 200 and all sprints', async () => {
+      await createSprints(
+        INSERTABLE_SPRINTS.map((sprint) => fakeSprint(sprint))
+      );
+
+      const { body } = await supertest(app)
+        .get('/sprints')
+        .expect(StatusCodes.OK);
+
+      expect(body).toEqual(
+        INSERTABLE_SPRINTS.map((sprint) => sprintMatcher(sprint))
+      );
+    });
   });
 
-  it('Should return 200 and all sprints', async () => {
-    await createSprints(INSERTABLE_SPRINTS.map((sprint) => fakeSprint(sprint)));
+  describe('POST', () => {
+    it('Should return 400 if the sprintCode is missing', async () => {
+      const { body } = await supertest(app)
+        .post('/sprints')
+        .send(omit(['sprintCode'], fakeSprint()))
+        .expect(StatusCodes.BAD_REQUEST);
 
-    const { body } = await supertest(app)
-      .get('/sprints')
-      .expect(StatusCodes.OK);
+      expect(body.error.message).toMatch(/sprintCode/i);
+    });
 
-    expect(body).toEqual(
-      INSERTABLE_SPRINTS.map((sprint) => sprintMatcher(sprint))
-    );
+    it('Should return 409 if the sprintCode already exists in the database', async () => {
+      const [sprint] = await createSprints(fakeSprint());
+
+      const { body } = await supertest(app)
+        .post('/sprints')
+        .send(sprint)
+        .expect(StatusCodes.CONFLICT);
+
+      expect(body.error.message).toMatch(/Sprint with sprintCode/i);
+    });
+
+    it('Should return 201 and post sprint', async () => {
+      const { body } = await supertest(app)
+        .post('/sprints')
+        .send(fakeSprint())
+        .expect(StatusCodes.CREATED);
+
+      expect(body).toEqual(sprintMatcher());
+    });
+  });
+
+  describe('PATCH', () => {
+    it('Should return 400 if the sprintCode and sprintTitle are missing', async () => {
+      const { body } = await supertest(app)
+        .patch('/sprints?id=1')
+        .send(omit(['sprintCode', 'sprintTitle'], fakeSprint()))
+        .expect(StatusCodes.BAD_REQUEST);
+
+      expect(body.error.message).toEqual(ERROR_PATCH_REQUEST);
+    });
+
+    it('Should return 404 if the sprintCode is missing', async () => {
+      const { body } = await supertest(app)
+        .patch('/sprints?id=1')
+        .send(omit(['sprintCode'], fakeSprint()))
+        .expect(StatusCodes.NOT_FOUND);
+
+      expect(body.error.message).toMatch(/Sprint with id/i);
+    });
+
+    it('Should return 400 if the id is not given in query', async () => {
+      const { body } = await supertest(app)
+        .patch('/sprints')
+        .send(SPRINTS_FOR_UPDATE[0])
+        .expect(StatusCodes.BAD_REQUEST);
+
+      expect(body.error.message).toMatch(/expected number/i);
+    });
+
+    it('Should return 404 if the sprint is missing', async () => {
+      const { body } = await supertest(app)
+        .patch('/sprints?id=1')
+        .send(SPRINTS_FOR_UPDATE[0])
+        .expect(StatusCodes.NOT_FOUND);
+
+      expect(body.error.message).toMatch(/Sprint with id/i);
+    });
+
+    it('Should return 409 if the new sprintCode already exists', async () => {
+      const [sprint] = await createSprints(fakeSprint());
+
+      const { body } = await supertest(app)
+        .patch(`/sprints?id=${sprint.id}`)
+        .send(sprint)
+        .expect(409);
+
+      expect(body.error.message).toMatch(/Sprint with sprintCode/i);
+    });
+
+    it('Should return 200 and patch sprint', async () => {
+      const [sprint] = await createSprints(fakeSprint());
+
+      const { body } = await supertest(app)
+        .patch(`/sprints?id=${sprint.id}`)
+        .send({
+          sprintCode: SPRINTS_FOR_UPDATE[0].sprintCode,
+          sprintTitle: SPRINTS_FOR_UPDATE[0].sprintTitle,
+        })
+        .expect(StatusCodes.OK);
+
+      expect(body).toEqual(
+        sprintMatcher({ ...SPRINTS_FOR_UPDATE[0], id: sprint.id })
+      );
+    });
+  });
+
+  describe('DELETE', () => {
+    it('Should return 400 if the id is not given in query', async () => {
+      const { body } = await supertest(app)
+        .delete('/sprints')
+        .expect(StatusCodes.BAD_REQUEST);
+
+      expect(body.error.message).toMatch(/expected number/i);
+    });
+
+    it('Should return 404 if sprint if not found', async () => {
+      const { body } = await supertest(app)
+        .delete('/sprints?id=1')
+        .expect(StatusCodes.NOT_FOUND);
+
+      expect(body.error.message).toMatch(/Sprint with id/i);
+    });
+
+    it('Should return 200 and delete the sprint', async () => {
+      const [sprint] = await createSprints(fakeSprintFull());
+
+      const { body } = await supertest(app)
+        .delete(`/sprints?id=${sprint.id}`)
+        .expect(StatusCodes.OK);
+
+      expect(body).toEqual(sprint);
+    });
+  });
+
+  describe('Method Not Allowed', () => {
+    it('Should return 405 for unsupported methods like PUT', async () => {
+      const { body } = await supertest(app)
+        .put('/sprints')
+        .send({})
+        .expect(StatusCodes.METHOD_NOT_ALLOWED);
+
+      expect(body.error.message).toMatch(/method not allowed/i);
+    });
   });
 });
 
-describe('POST', () => {
-  it('Should return 400 if the sprintCode is missing', async () => {
-    const { body } = await supertest(app)
-      .post('/sprints')
-      .send(omit(['sprintCode'], fakeSprint()))
-      .expect(StatusCodes.BAD_REQUEST);
+describe('Route /sprints/:id', () => {
+  describe('GET', () => {
+    it('Should return 404 and throw an error SprintNotFound', async () => {
+      const { body } = await supertest(app)
+        .get('/sprints/999')
+        .expect(StatusCodes.NOT_FOUND);
 
-    expect(body.error.message).toMatch(/sprintCode/i);
+      expect(body.error.message).toMatch(/Sprint with id/i);
+    });
+
+    it('Should return 200 and sprint by given id', async () => {
+      const [sprint] = await createSprints(fakeSprint());
+
+      const { body } = await supertest(app)
+        .get(`/sprints/${sprint.id}`)
+        .expect(StatusCodes.OK);
+
+      expect(body).toEqual(sprint);
+    });
   });
 
-  it('Should return 409 if the sprintCode already exists in the database', async () => {
-    const [sprint] = await createSprints(fakeSprint());
+  describe('PATCH', () => {
+    it('Should return 400 if the sprintCode and sprintTitle are missing', async () => {
+      const { body } = await supertest(app)
+        .patch('/sprints/1')
+        .send(omit(['sprintCode', 'sprintTitle'], fakeSprint()))
+        .expect(StatusCodes.BAD_REQUEST);
 
-    const { body } = await supertest(app)
-      .post('/sprints')
-      .send(sprint)
-      .expect(StatusCodes.CONFLICT);
+      expect(body.error.message).toEqual(ERROR_PATCH_REQUEST);
+    });
 
-    expect(body.error.message).toMatch(/Sprint with sprintCode/i);
+    it('Should return 404 if the sprintCode is missing', async () => {
+      const { body } = await supertest(app)
+        .patch('/sprints/1')
+        .send(omit(['sprintCode'], fakeSprint()))
+        .expect(StatusCodes.NOT_FOUND);
+
+      expect(body.error.message).toMatch(/Sprint with id/i);
+    });
+
+    it('Should return 400 if the id is not valid', async () => {
+      const { body } = await supertest(app)
+        .patch('/sprints/string')
+        .send(fakeSprint())
+        .expect(StatusCodes.BAD_REQUEST);
+
+      expect(body.error.message).toMatch(/expected number/i);
+    });
+
+    it('Should return 404 if the sprint is missing', async () => {
+      const { body } = await supertest(app)
+        .patch('/sprints/1')
+        .send(SPRINTS_FOR_UPDATE[0])
+        .expect(StatusCodes.NOT_FOUND);
+
+      expect(body.error.message).toMatch(/Sprint with id/i);
+    });
+
+    it('Should return 409 if the new sprintCode already exists', async () => {
+      const [sprint] = await createSprints(fakeSprint());
+
+      const { body } = await supertest(app)
+        .patch(`/sprints/${sprint.id}`)
+        .send(sprint)
+        .expect(409);
+
+      expect(body.error.message).toMatch(/Sprint with sprintCode/i);
+    });
+
+    it('Should return 200 and patch sprint', async () => {
+      const [sprint] = await createSprints(fakeSprint());
+
+      const { body } = await supertest(app)
+        .patch(`/sprints/${sprint.id}`)
+        .send({
+          sprintCode: SPRINTS_FOR_UPDATE[0].sprintCode,
+          sprintTitle: SPRINTS_FOR_UPDATE[0].sprintTitle,
+        })
+        .expect(StatusCodes.OK);
+
+      expect(body).toEqual(
+        sprintMatcher({ ...SPRINTS_FOR_UPDATE[0], id: sprint.id })
+      );
+    });
   });
 
-  it('Should return 201 and post sprint', async () => {
-    const { body } = await supertest(app)
-      .post('/sprints')
-      .send(fakeSprint())
-      .expect(StatusCodes.CREATED);
+  describe('DELETE', () => {
+    it('Should return 400 if the id is not valid', async () => {
+      const { body } = await supertest(app)
+        .delete('/sprints/string')
+        .expect(StatusCodes.BAD_REQUEST);
 
-    expect(body).toEqual(sprintMatcher());
-  });
-});
+      expect(body.error.message).toMatch(/expected number/i);
+    });
 
-describe('PATCH', () => {
-  it('Should return 400 if the sprintCode and sprintTitle are missing', async () => {
-    const { body } = await supertest(app)
-      .patch('/sprints?id=1')
-      .send(omit(['sprintCode', 'sprintTitle'], fakeSprint()))
-      .expect(StatusCodes.BAD_REQUEST);
+    it('Should return 404 if sprint if not found', async () => {
+      const { body } = await supertest(app)
+        .delete('/sprints/1')
+        .expect(StatusCodes.NOT_FOUND);
 
-    expect(body.error.message).toEqual(ERROR_PATCH_REQUEST);
-  });
+      expect(body.error.message).toMatch(/Sprint with id/i);
+    });
 
-  it('Should return 404 if the sprintCode is missing', async () => {
-    const { body } = await supertest(app)
-      .patch('/sprints?id=1')
-      .send(omit(['sprintCode'], fakeSprint()))
-      .expect(StatusCodes.NOT_FOUND);
+    it('Should return 200 and delete the sprint', async () => {
+      const [sprint] = await createSprints(fakeSprintFull());
 
-    expect(body.error.message).toMatch(/Sprint with id/i);
-  });
+      const { body } = await supertest(app)
+        .delete(`/sprints/${sprint.id}`)
+        .expect(StatusCodes.OK);
 
-  it('Should return 400 if the id is not given in query', async () => {
-    const { body } = await supertest(app)
-      .patch('/sprints')
-      .send(SPRINTS_FOR_UPDATE[0])
-      .expect(StatusCodes.BAD_REQUEST);
-
-    expect(body.error.message).toMatch(/expected number/i);
+      expect(body).toEqual(sprint);
+    });
   });
 
-  it('Should return 404 if the sprint is missing', async () => {
-    const { body } = await supertest(app)
-      .patch('/sprints?id=1')
-      .send(SPRINTS_FOR_UPDATE[0])
-      .expect(StatusCodes.NOT_FOUND);
+  describe('Method Not Allowed', () => {
+    it('Should return 405 for unsupported methods like PUT', async () => {
+      const { body } = await supertest(app)
+        .put('/sprints/1')
+        .send({})
+        .expect(StatusCodes.METHOD_NOT_ALLOWED);
 
-    expect(body.error.message).toMatch(/Sprint with id/i);
-  });
-
-  it('Should return 409 if the new sprintCode already exists', async () => {
-    const [sprint] = await createSprints(fakeSprint());
-
-    const { body } = await supertest(app)
-      .patch(`/sprints?id=${sprint.id}`)
-      .send(sprint)
-      .expect(409);
-
-    expect(body.error.message).toMatch(/Sprint with sprintCode/i);
-  });
-
-  it('Should return 200 and patch sprint', async () => {
-    const [sprint] = await createSprints(fakeSprint());
-
-    const { body } = await supertest(app)
-      .patch(`/sprints?id=${sprint.id}`)
-      .send({
-        sprintCode: SPRINTS_FOR_UPDATE[0].sprintCode,
-        sprintTitle: SPRINTS_FOR_UPDATE[0].sprintTitle,
-      })
-      .expect(StatusCodes.OK);
-
-    expect(body).toEqual(
-      sprintMatcher({ ...SPRINTS_FOR_UPDATE[0], id: sprint.id })
-    );
-  });
-});
-
-describe('DELETE', () => {
-  it('Should return 400 if the id is not given in query', async () => {
-    const { body } = await supertest(app)
-      .delete('/sprints')
-      .expect(StatusCodes.BAD_REQUEST);
-
-    expect(body.error.message).toMatch(/expected number/i);
-  });
-
-  it('Should return 404 if sprint if not found', async () => {
-    const { body } = await supertest(app)
-      .delete('/sprints?id=1')
-      .expect(StatusCodes.NOT_FOUND);
-
-    expect(body.error.message).toMatch(/Sprint with id/i);
-  });
-
-  it('Should return 200 and delete the sprint', async () => {
-    const [sprint] = await createSprints(fakeSprintFull());
-
-    const { body } = await supertest(app)
-      .delete(`/sprints?id=${sprint.id}`)
-      .expect(StatusCodes.OK);
-
-    expect(body).toEqual(sprint);
-  });
-});
-
-describe('Method Not Allowed', () => {
-  it('Should return 405 for unsupported methods like PUT', async () => {
-    const { body } = await supertest(app)
-      .put('/sprints')
-      .send({})
-      .expect(StatusCodes.METHOD_NOT_ALLOWED);
-
-    expect(body.error.message).toMatch(/method not allowed/i);
+      expect(body.error.message).toMatch(/method not allowed/i);
+    });
   });
 });

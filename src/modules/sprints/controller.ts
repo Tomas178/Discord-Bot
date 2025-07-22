@@ -30,15 +30,42 @@ export default (db: Database) => {
           throw new BadRequest(ERROR_PATCH_REQUEST);
         }
 
-        return service.updateSprint(id, {
-          sprintCode: body.sprintCode,
-          sprintTitle: body.sprintTitle,
-        });
+        return service.updateSprint(id, body);
       }, StatusCodes.OK)
     )
     .delete(
       jsonRoute(async (req) => {
         const id = schema.parseId(req.query.id);
+
+        return service.removeSprint(id);
+      })
+    )
+    .all(unsupportedRoute);
+
+  router
+    .route('/:id')
+    .get(
+      jsonRoute(async (req) => {
+        const id = schema.parseId(req.params.id);
+
+        return service.findById(id);
+      })
+    )
+    .patch(
+      jsonRoute(async (req) => {
+        const id = schema.parseId(req.params.id);
+        const body = schema.parseUpdateable(req.body);
+
+        if (!body.sprintCode && !body.sprintTitle) {
+          throw new BadRequest(ERROR_PATCH_REQUEST);
+        }
+
+        return service.updateSprint(id, body);
+      })
+    )
+    .delete(
+      jsonRoute(async (req) => {
+        const id = schema.parseId(req.params.id);
 
         return service.removeSprint(id);
       })
