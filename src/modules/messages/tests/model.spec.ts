@@ -35,8 +35,64 @@ describe('findAll', () => {
   });
 });
 
+describe('findByUsernameAndSprintCode', () => {
+  it('Should return an empty array', async () => {
+    const messages = await model.findByUsernameAndSprintCode(
+      'username',
+      'sprint'
+    );
+
+    expect(messages).toEqual([]);
+  });
+
+  it('Should return one message', async () => {
+    await createMessages(
+      INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
+    );
+
+    const messages = await model.findByUsernameAndSprintCode(
+      INSERTABLE_MESSAGES[0].username,
+      INSERTABLE_MESSAGES[0].sprintCode
+    );
+
+    expect(messages).toHaveLength(1);
+    expect(messages).toEqual([messageMatcher(INSERTABLE_MESSAGES[0])]);
+  });
+
+  it('Should return all messages', async () => {
+    await createMessages(
+      INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
+    );
+
+    const username = INSERTABLE_MESSAGES[1].username;
+    const sprintCode = INSERTABLE_MESSAGES[1].sprintCode;
+
+    await createMessages(
+      fakeMessage({
+        username: username,
+        sprintCode: sprintCode,
+      })
+    );
+
+    const messages = await model.findByUsernameAndSprintCode(
+      username,
+      sprintCode
+    );
+
+    expect(messages).toHaveLength(2);
+
+    expect(messages[0]).toEqual(messageMatcher(INSERTABLE_MESSAGES[1]));
+    expect(messages[1]).toEqual(
+      messageMatcher({
+        username: username,
+        sprintCode: sprintCode,
+      })
+    );
+  });
+});
+
 describe('findByUsername', () => {
-  it('Should return empty array', async () => {
+  it('Should return an empty array', async () => {
     const messages = await model.findByUsername('username');
 
     expect(messages).toEqual([]);

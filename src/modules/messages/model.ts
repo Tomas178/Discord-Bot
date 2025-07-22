@@ -12,6 +12,17 @@ export default (db: Database) => ({
   findAll: async (): Promise<RowSelect[]> =>
     db.selectFrom(TABLE).selectAll().execute(),
 
+  findByUsernameAndSprintCode: async (
+    username: string,
+    sprint: string
+  ): Promise<RowSelect[]> =>
+    db
+      .selectFrom(TABLE)
+      .selectAll()
+      .where('username', '=', username)
+      .where('sprintCode', '=', sprint)
+      .execute(),
+
   findByUsername: async (username: string): Promise<RowSelect[]> =>
     db.selectFrom(TABLE).selectAll().where('username', '=', username).execute(),
 
