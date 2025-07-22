@@ -17,15 +17,14 @@ export default (db: Database, discordClient: Client) => {
     .route('/')
     .get(
       jsonRoute(async (req: Request<{}, {}, {}, GetRequest>) => {
-        if (req.query.username) {
-          const username = schema.parseUsername(req.query.username);
-          return service.findByUsername(username);
-        }
+        const { username, sprintCode } = schema.parseGetQuery(req.query);
 
-        if (req.query.sprint) {
-          const sprintCode = schema.parseSprintCode(req.query.sprint);
-          return service.findBySprintCode(sprintCode);
-        }
+        if (username && sprintCode)
+          return service.findByUsernameAndSprintCode(username, sprintCode);
+
+        if (username) return service.findByUsername(username);
+
+        if (sprintCode) return service.findBySprintCode(sprintCode);
 
         return service.findAll();
       })

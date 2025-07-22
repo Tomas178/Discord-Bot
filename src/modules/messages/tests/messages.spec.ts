@@ -66,6 +66,72 @@ describe('GET', () => {
     });
   });
 
+  describe('Query for username and sprint', () => {
+    it('Should return 404 if messages for the given username are not found', async () => {
+      const { body } = await supertest(app)
+        .get('/messages?username=Tomas&sprint=WD-1.1')
+        .expect(StatusCodes.NOT_FOUND);
+
+      expect(body.error.message).toMatch(/Messages with username/);
+    });
+
+    it('Should return 404 if messages for the given sprint are not found', async () => {
+      const [createdMessage] = await createMessages(
+        fakeMessage({ sprintCode: 'WD-1.1' })
+      );
+
+      const username = createdMessage.username;
+      const invalidSprint = 'WD-1.2';
+
+      const { body } = await supertest(app)
+        .get(`/messages?username=${username}&sprint=${invalidSprint}`)
+        .expect(StatusCodes.NOT_FOUND);
+
+      expect(body.error.message).toMatch(/Messages with sprintCode/);
+    });
+
+    it('Should return 404 if messages for the given username and sprint are not found', async () => {
+      const [firstCreatedMessage] = await createMessages(
+        fakeMessage({
+          sprintCode: 'WD-1.1',
+        })
+      );
+
+      const [secondCreatedMessage] = await createMessages(
+        fakeMessage({
+          username: firstCreatedMessage.username + 'a',
+          sprintCode: 'WD-1.2',
+        })
+      );
+
+      const firstMessageUsername = firstCreatedMessage.username;
+      const secondMessageSprintCode = secondCreatedMessage.sprintCode;
+
+      const { body } = await supertest(app)
+        .get(
+          `/messages?username=${firstMessageUsername}&sprint=${secondMessageSprintCode}`
+        )
+        .expect(StatusCodes.NOT_FOUND);
+
+      expect(body.error.message).toMatch(
+        `Messages with username: ${firstMessageUsername} and sprintCode: ${secondMessageSprintCode}`
+      );
+    });
+
+    it('Should return 200 and all messages', async () => {
+      const [createdMessage] = await createMessages(fakeMessage());
+
+      const username = createdMessage.username;
+      const sprint = createdMessage.sprintCode;
+
+      const { body } = await supertest(app)
+        .get(`/messages?username=${username}&sprint=${sprint}`)
+        .expect(StatusCodes.OK);
+
+      expect(body).toEqual([messageMatcher()]);
+    });
+  });
+
   describe('Query for username', () => {
     it('Should return 404 if messages for the given username are not found', async () => {
       const { body } = await supertest(app)
