@@ -13,13 +13,13 @@ import {
   ERROR_FAILED_TO_SEND_TO_DISCORD_CHANNEL,
   EMBED_COLOR,
 } from './constants';
+import { FAKE_GIPHY_URL } from '@/modules/messages/utils/constants';
 
 const username = 'testUser';
 const userId = '12345';
 const message = `Hello ${username}`;
-const gifUrl = 'https://giphy.com/fake.gif';
 const finalMessage = `Hello <@${userId}>`;
-const embed = new EmbedBuilder().setImage(gifUrl).setColor(EMBED_COLOR);
+const embed = new EmbedBuilder().setImage(FAKE_GIPHY_URL).setColor(EMBED_COLOR);
 
 describe('Sad paths', () => {
   it('Should throw an error because of missing guilds', async () => {
@@ -30,11 +30,11 @@ describe('Sad paths', () => {
     } as Client;
 
     await expect(
-      sendMessageToDiscordServer(message, gifUrl, username, mockClient)
+      sendMessageToDiscordServer(message, FAKE_GIPHY_URL, username, mockClient)
     ).rejects.toThrow(new BotNotFound());
   });
 
-  it('Should throw return if no textChannel has been found', async () => {
+  it('Should return early if no textChannel has been found', async () => {
     const mockTextChannel = {
       type: ChannelType.GuildVoice,
     } as unknown as TextChannel;
@@ -58,7 +58,12 @@ describe('Sad paths', () => {
       },
     } as Client;
 
-    await sendMessageToDiscordServer(message, gifUrl, username, mockClient);
+    await sendMessageToDiscordServer(
+      message,
+      FAKE_GIPHY_URL,
+      username,
+      mockClient
+    );
 
     expect(mockFetchChannels).toHaveBeenCalled();
     expect(mockGuild.members.fetch).not.toHaveBeenCalled();
@@ -101,7 +106,7 @@ describe('Sad paths', () => {
     } as unknown as Client;
 
     await expect(
-      sendMessageToDiscordServer(message, gifUrl, username, mockClient)
+      sendMessageToDiscordServer(message, FAKE_GIPHY_URL, username, mockClient)
     ).rejects.toThrow(ERROR_FAILED_TO_SEND_TO_DISCORD_CHANNEL);
 
     expect(mockSend).toHaveBeenCalledOnce();
@@ -138,7 +143,12 @@ describe('Happy paths', () => {
       },
     } as Client;
 
-    await sendMessageToDiscordServer(message, gifUrl, username, mockClient);
+    await sendMessageToDiscordServer(
+      message,
+      FAKE_GIPHY_URL,
+      username,
+      mockClient
+    );
 
     expect(mockSend).toBeCalledWith({
       content: message,
@@ -183,7 +193,12 @@ describe('Happy paths', () => {
       },
     } as Client;
 
-    await sendMessageToDiscordServer(message, gifUrl, username, mockClient);
+    await sendMessageToDiscordServer(
+      message,
+      FAKE_GIPHY_URL,
+      username,
+      mockClient
+    );
 
     expect(mockSend).toBeCalledWith({
       content: finalMessage,
@@ -231,7 +246,12 @@ describe('Happy paths', () => {
       },
     } as Client;
 
-    await sendMessageToDiscordServer(message, gifUrl, username, mockClient);
+    await sendMessageToDiscordServer(
+      message,
+      FAKE_GIPHY_URL,
+      username,
+      mockClient
+    );
 
     expect(mockSend).toBeCalledWith({
       content: finalMessage,
