@@ -11,6 +11,7 @@ import NotFound from '@/utils/errors/NotFound';
 import { ERROR_NO_SPRINT, ERROR_NO_TEMPLATES } from '../utils/constants';
 import {
   MessagesBySprintCodeNotFound,
+  MessagesByUsernameAndSprintCodeNotFound,
   MessagesByUsernameNotFound,
 } from '../utils/errors';
 
@@ -44,6 +45,85 @@ describe('findAll', () => {
     expect(messages).toEqual(
       INSERTABLE_MESSAGES.map((message) => messageMatcher(message))
     );
+  });
+});
+
+describe('findByUsernameAndSprintCode', () => {
+  it('Should throw a MessagesByUsernameNotFound', async () => {
+    const username = 'username';
+    const sprintCode = 'WD-1.1';
+
+    await expect(
+      service.findByUsernameAndSprintCode(username, sprintCode)
+    ).rejects.toThrow(new MessagesByUsernameNotFound(username));
+  });
+
+  it('Should throw a MessagesBySprintCodeNotFound', async () => {
+    const [createdMessage] = await createMessages(fakeMessage());
+
+    const username = createdMessage.username;
+    const invalidSprintCode = createdMessage.sprintCode + 'a';
+
+    await expect(
+      service.findByUsernameAndSprintCode(username, invalidSprintCode)
+    ).rejects.toThrow(new MessagesBySprintCodeNotFound(invalidSprintCode));
+  });
+
+  it('Should throw MessagesByUsernameAndSprintCodeNotFound', async () => {
+    const [firstCreatedMessage] = await createMessages(fakeMessage());
+
+    const [secondCreatedMessage] = await createMessages(
+      fakeMessage({
+        username: firstCreatedMessage.username + 'a',
+        sprintCode: firstCreatedMessage.sprintCode + 'a',
+      })
+    );
+
+    const firstMessageUsername = firstCreatedMessage.username;
+    const secondMessageSprintCode = secondCreatedMessage.sprintCode;
+
+    await expect(
+      service.findByUsernameAndSprintCode(
+        firstMessageUsername,
+        secondMessageSprintCode
+      )
+    ).rejects.toThrow(
+      new MessagesByUsernameAndSprintCodeNotFound(
+        firstMessageUsername,
+        secondMessageSprintCode
+      )
+    );
+  });
+
+  it('Should return one message', async () => {
+    await createMessages(
+      INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
+    );
+
+    const messages = await service.findByUsernameAndSprintCode(
+      INSERTABLE_MESSAGES[0].username,
+      INSERTABLE_MESSAGES[0].sprintCode
+    );
+
+    expect(messages).toHaveLength(1);
+    expect(messages).toEqual([messageMatcher(INSERTABLE_MESSAGES[0])]);
+  });
+
+  it('Should return all matching messages', async () => {
+    await createMessages(
+      INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
+    );
+
+    await createMessages(fakeMessage(INSERTABLE_MESSAGES[0]));
+
+    const messages = await service.findByUsernameAndSprintCode(
+      INSERTABLE_MESSAGES[0].username,
+      INSERTABLE_MESSAGES[0].sprintCode
+    );
+
+    expect(messages).toHaveLength(2);
+    expect(messages[0]).toEqual(messageMatcher(INSERTABLE_MESSAGES[0]));
+    expect(messages[1]).toEqual(messageMatcher(INSERTABLE_MESSAGES[0]));
   });
 });
 

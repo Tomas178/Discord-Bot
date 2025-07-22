@@ -7,6 +7,7 @@ import { formatTemplateMessage } from './utils/formatTemplateMessage/formatTempl
 import { ERROR_NO_SPRINT, ERROR_NO_TEMPLATES } from './utils/constants';
 import {
   MessagesBySprintCodeNotFound,
+  MessagesByUsernameAndSprintCodeNotFound,
   MessagesByUsernameNotFound,
 } from './utils/errors';
 import { fetchRandomCelebrationGif } from './utils/giphyClient/giphyClient';
@@ -18,6 +19,36 @@ export default (db: Database) => {
 
   return {
     findAll: async () => messages.findAll(),
+
+    findByUsernameAndSprintCode: async (
+      username: string,
+      sprintCode: string
+    ) => {
+      const messagesInDatabaseByUsername =
+        await messages.findByUsername(username);
+
+      if (messagesInDatabaseByUsername.length === 0) {
+        throw new MessagesByUsernameNotFound(username);
+      }
+
+      const messagesInDatabaseBySprintCode =
+        await messages.findBySprintCode(sprintCode);
+
+      if (messagesInDatabaseBySprintCode.length === 0) {
+        throw new MessagesBySprintCodeNotFound(sprintCode);
+      }
+
+      const messagesInDatabase = await messages.findByUsernameAndSprintCode(
+        username,
+        sprintCode
+      );
+
+      if (messagesInDatabase.length === 0) {
+        throw new MessagesByUsernameAndSprintCodeNotFound(username, sprintCode);
+      }
+
+      return messagesInDatabase;
+    },
 
     findByUsername: async (username: string) => {
       const messagesInDatabase = await messages.findByUsername(username);

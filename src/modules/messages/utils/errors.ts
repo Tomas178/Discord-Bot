@@ -17,3 +17,11 @@ export class GifNotFound extends NotFound {
     super('No celebration GIFs found!');
   }
 }
+
+export class MessagesByUsernameAndSprintCodeNotFound extends NotFound {
+  constructor(username: string, sprintCode: string) {
+    super(
+      `Messages with username: ${username} and sprintCode: ${sprintCode} not found!`
+    );
+  }
+}
