@@ -7,16 +7,7 @@ import { StatusCodes } from 'http-status-codes';
 import { Client } from 'discord.js';
 import sendMessageToDiscordServer from '@/utils/discord/sendMessageToDiscordServer';
 import { ERROR_INSERTING_MESSAGE_TO_DATABASE } from './utils/constants';
-
-type PostRequest = {
-  username: string;
-  sprintCode: string;
-};
-
-type GetRequest = {
-  username?: string;
-  sprint?: string;
-};
+import { GetRequest, PostRequest } from './utils/types';
 
 export default (db: Database, discordClient: Client) => {
   const router = Router();
