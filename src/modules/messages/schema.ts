@@ -8,10 +8,10 @@ import {
   MAX_LENGTH_MESSAGE,
   MAX_LENGTH_USERNAME,
 } from './utils/constants';
-
-const sprintCodeRegex = new RegExp(/^[A-Z]+-\d+\.\d+$/);
-const sprintCodeErrorMessage =
-  'Sprint code must match the pattern: Course-Module.Sprint (e.g., WD-1.1) ';
+import {
+  ERROR_INVALID_SPRINTCODE,
+  sprintCodeRegex,
+} from '../sprints/utils/constants';
 
 type Record = Messages;
 const schema = z.object({
@@ -20,9 +20,7 @@ const schema = z.object({
     .string()
     .nonempty(ERROR_EMPTY_MESSAGE)
     .max(MAX_LENGTH_MESSAGE, ERROR_TOO_LONG_MESSAGE),
-  sprintCode: z.string().regex(sprintCodeRegex, {
-    message: sprintCodeErrorMessage,
-  }),
+  sprintCode: z.string().regex(sprintCodeRegex, ERROR_INVALID_SPRINTCODE),
   username: z
     .string()
     .nonempty(ERROR_EMPTY_USERNAME)
@@ -34,6 +32,11 @@ const schema = z.object({
 const insertable = schema.pick({
   sprintCode: true,
   username: true,
+});
+
+const getQuery = z.object({
+  username: schema.shape.username.optional(),
+  sprint: schema.shape.sprintCode.optional(),
 });
 
 export const parse = (record: unknown) => schema.parse(record);
@@ -49,6 +52,14 @@ export const parseSprintCode = (sprintCode: unknown) =>
   schema.shape.sprintCode.parse(sprintCode);
 
 export const parseInsertable = (record: unknown) => insertable.parse(record);
+
+export const parseGetQuery = (record: unknown) => {
+  const parsed = getQuery.parse(record);
+  return {
+    username: parsed.username,
+    sprintCode: parsed.sprint,
+  };
+};
 
 export const keys: (keyof Record)[] = Object.keys(
   schema.shape

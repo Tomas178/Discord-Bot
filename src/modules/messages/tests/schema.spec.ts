@@ -1,6 +1,7 @@
-import { omit } from 'lodash/fp';
+import { omit, omitAll } from 'lodash/fp';
 import {
   parse,
+  parseGetQuery,
   parseId,
   parseInsertable,
   parseMessage,
@@ -16,6 +17,7 @@ import {
   MAX_LENGTH_MESSAGE,
   MAX_LENGTH_USERNAME,
 } from '../utils/constants';
+import { ERROR_INVALID_SPRINTCODE } from '@/modules/sprints/utils/constants';
 
 describe('parse', () => {
   it('Parses a valid record', async () => {
@@ -52,7 +54,7 @@ describe('parse', () => {
         sprintCode: 'WD1.1',
       });
       expect(() => parse(sprintWithInvalidSprintCode)).toThrow(
-        /Sprint code must match the pattern/i
+        ERROR_INVALID_SPRINTCODE
       );
     });
   });
@@ -134,17 +136,13 @@ describe('parseSprintCode', () => {
   it('Throws an error due to empty sprintCode', () => {
     const sprintCode = '';
 
-    expect(() => parseSprintCode(sprintCode)).toThrow(
-      /Sprint code must match the pattern/i
-    );
+    expect(() => parseSprintCode(sprintCode)).toThrow(ERROR_INVALID_SPRINTCODE);
   });
 
   it('Throws an error due to invalid sprintCode', () => {
     const sprintCode = 'TP-1.';
 
-    expect(() => parseSprintCode(sprintCode)).toThrow(
-      /Sprint code must match the pattern/i
-    );
+    expect(() => parseSprintCode(sprintCode)).toThrow(ERROR_INVALID_SPRINTCODE);
   });
 
   it('Parses a valid sprintCode', () => {
@@ -160,5 +158,68 @@ describe('parseInsertable', () => {
 
     expect(parsed).not.toHaveProperty('id');
     expect(parsed).not.toHaveProperty('createdAt');
+  });
+});
+
+describe('parseGetQuery', () => {
+  const getQuery = {
+    username: 'fakeUsername',
+    sprint: 'WD-1.1',
+  };
+
+  it('Should return both username and sprint', () => {
+    const expectedResult = {
+      username: getQuery.username,
+      sprintCode: getQuery.sprint,
+    };
+
+    const parsed = parseGetQuery(getQuery);
+
+    expect(parsed).toStrictEqual(expectedResult);
+  });
+
+  it('Should only return username', () => {
+    const { username, sprintCode } = parseGetQuery(omit(['sprint'], getQuery));
+
+    expect(username).toBe(getQuery.username);
+    expect(sprintCode).toBeUndefined();
+  });
+
+  it('Should only return sprintCode', () => {
+    const { username, sprintCode } = parseGetQuery(
+      omit(['username'], getQuery)
+    );
+
+    expect(username).toBeUndefined();
+    expect(sprintCode).toBe(getQuery.sprint);
+  });
+
+  it('Should return both undefined', () => {
+    const expectedResult = {
+      username: undefined,
+      sprintCode: undefined,
+    };
+
+    const parsed = parseGetQuery(omitAll(['username', 'sprint'], getQuery));
+
+    expect(parsed).toStrictEqual(expectedResult);
+  });
+
+  it('Should throw an error on invalid username', () => {
+    const getQueryInvalid = { username: 'a'.repeat(MAX_LENGTH_USERNAME + 1) };
+
+    expect(() => parseGetQuery(getQueryInvalid)).toThrow(
+      ERROR_TOO_LONG_USERNAME
+    );
+  });
+
+  it('Should throw an error on invalid sprint', () => {
+    const getQueryInvalid = {
+      sprint: 'WD1-1',
+    };
+
+    expect(() => parseGetQuery(getQueryInvalid)).toThrow(
+      ERROR_INVALID_SPRINTCODE
+    );
   });
 });
