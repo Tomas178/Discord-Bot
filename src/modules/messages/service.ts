@@ -6,6 +6,7 @@ import NotFound from '@/utils/errors/NotFound';
 import { formatTemplateMessage } from './utils/formatTemplateMessage/formatTemplateMessage';
 import { ERROR_NO_SPRINT, ERROR_NO_TEMPLATES } from './utils/constants';
 import {
+  MessageByIdNotFound,
   MessagesBySprintCodeNotFound,
   MessagesByUsernameAndSprintCodeNotFound,
   MessagesByUsernameNotFound,
@@ -19,6 +20,13 @@ export default (db: Database) => {
 
   return {
     findAll: async () => messages.findAll(),
+
+    findById: async (id: number) => {
+      const message = await messages.findById(id);
+      if (!message) throw new MessageByIdNotFound(id);
+
+      return message;
+    },
 
     findByUsernameAndSprintCode: async (
       username: string,

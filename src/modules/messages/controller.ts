@@ -65,7 +65,17 @@ export default (db: Database, discordClient: Client) => {
         }
       }, StatusCodes.CREATED)
     )
+    .all(unsupportedRoute);
 
+  router
+    .route('/:id')
+    .get(
+      jsonRoute(async (req) => {
+        const id = schema.parseId(req.params.id);
+
+        return service.findById(id);
+      })
+    )
     .all(unsupportedRoute);
 
   return router;

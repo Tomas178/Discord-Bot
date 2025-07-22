@@ -40,233 +40,257 @@ afterEach(async () => {
   db.deleteFrom('sprints').execute();
 });
 
-describe('GET', () => {
-  describe('No query', () => {
-    it('Should return 200 and an empty array when there are no messages', async () => {
-      const { body } = await supertest(app)
-        .get('/messages')
-        .expect(StatusCodes.OK);
+describe('Route /messages', () => {
+  describe('GET', () => {
+    describe('No query', () => {
+      it('Should return 200 and an empty array when there are no messages', async () => {
+        const { body } = await supertest(app)
+          .get('/messages')
+          .expect(StatusCodes.OK);
 
-      expect(body).toEqual([]);
+        expect(body).toEqual([]);
+      });
+
+      it('Should return 200 and all messages', async () => {
+        await createMessages(
+          INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
+        );
+
+        const { body } = await supertest(app)
+          .get('/messages')
+          .expect(StatusCodes.OK);
+
+        expect(body).toHaveLength(INSERTABLE_MESSAGES.length);
+        expect(body).toEqual(
+          INSERTABLE_MESSAGES.map((message) => messageMatcher(message))
+        );
+      });
     });
 
-    it('Should return 200 and all messages', async () => {
-      await createMessages(
-        INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
-      );
+    describe('Query for username and sprint', () => {
+      it('Should return 404 if messages for the given username are not found', async () => {
+        const { body } = await supertest(app)
+          .get('/messages?username=Tomas&sprint=WD-1.1')
+          .expect(StatusCodes.NOT_FOUND);
 
-      const { body } = await supertest(app)
-        .get('/messages')
-        .expect(StatusCodes.OK);
+        expect(body.error.message).toMatch(/Messages with username/);
+      });
 
-      expect(body).toHaveLength(INSERTABLE_MESSAGES.length);
-      expect(body).toEqual(
-        INSERTABLE_MESSAGES.map((message) => messageMatcher(message))
-      );
+      it('Should return 404 if messages for the given sprint are not found', async () => {
+        const [createdMessage] = await createMessages(
+          fakeMessage({ sprintCode: 'WD-1.1' })
+        );
+
+        const username = createdMessage.username;
+        const invalidSprint = 'WD-1.2';
+
+        const { body } = await supertest(app)
+          .get(`/messages?username=${username}&sprint=${invalidSprint}`)
+          .expect(StatusCodes.NOT_FOUND);
+
+        expect(body.error.message).toMatch(/Messages with sprintCode/);
+      });
+
+      it('Should return 404 if messages for the given username and sprint are not found', async () => {
+        const [firstCreatedMessage] = await createMessages(
+          fakeMessage({
+            sprintCode: 'WD-1.1',
+          })
+        );
+
+        const [secondCreatedMessage] = await createMessages(
+          fakeMessage({
+            username: firstCreatedMessage.username + 'a',
+            sprintCode: 'WD-1.2',
+          })
+        );
+
+        const firstMessageUsername = firstCreatedMessage.username;
+        const secondMessageSprintCode = secondCreatedMessage.sprintCode;
+
+        const { body } = await supertest(app)
+          .get(
+            `/messages?username=${firstMessageUsername}&sprint=${secondMessageSprintCode}`
+          )
+          .expect(StatusCodes.NOT_FOUND);
+
+        expect(body.error.message).toMatch(
+          `Messages with username: ${firstMessageUsername} and sprintCode: ${secondMessageSprintCode}`
+        );
+      });
+
+      it('Should return 200 and all messages', async () => {
+        const [createdMessage] = await createMessages(fakeMessage());
+
+        const username = createdMessage.username;
+        const sprint = createdMessage.sprintCode;
+
+        const { body } = await supertest(app)
+          .get(`/messages?username=${username}&sprint=${sprint}`)
+          .expect(StatusCodes.OK);
+
+        expect(body).toEqual([messageMatcher()]);
+      });
+    });
+
+    describe('Query for username', () => {
+      it('Should return 404 if messages for the given username are not found', async () => {
+        const { body } = await supertest(app)
+          .get('/messages?username=Tomas')
+          .expect(StatusCodes.NOT_FOUND);
+
+        expect(body.error.message).toMatch(/Messages with username/);
+      });
+
+      it('Should return 200 and messages with given username', async () => {
+        await createMessages(
+          INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
+        );
+
+        const { body } = await supertest(app)
+          .get(`/messages?username=${INSERTABLE_MESSAGES[0].username}`)
+          .expect(StatusCodes.OK);
+
+        expect(body).toEqual([messageMatcher(INSERTABLE_MESSAGES[0])]);
+      });
+    });
+
+    describe('Query for sprint', () => {
+      it('Should return 404 if messages for the given sprint are not found', async () => {
+        const { body } = await supertest(app)
+          .get('/messages?sprint=WD-1.1')
+          .expect(StatusCodes.NOT_FOUND);
+
+        expect(body.error.message).toMatch(/Messages with sprintCode/);
+      });
+
+      it('Should return 200 and messages with given sprint', async () => {
+        await createMessages(
+          INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
+        );
+
+        const { body } = await supertest(app)
+          .get(`/messages?sprint=${INSERTABLE_MESSAGES[0].sprintCode}`)
+          .expect(StatusCodes.OK);
+
+        expect(body).toEqual([messageMatcher(INSERTABLE_MESSAGES[0])]);
+      });
     });
   });
 
-  describe('Query for username and sprint', () => {
-    it('Should return 404 if messages for the given username are not found', async () => {
+  describe('POST', () => {
+    it('Should return 500 in case of insertion to database error', async () => {
+      vi.resetModules();
+
+      vi.doMock('../service', () => {
+        return {
+          default: () => ({
+            createMessage: vi.fn().mockRejectedValue(new Error()),
+            formMessage: vi.fn().mockResolvedValue({
+              message: 'message',
+              gifUrl: FAKE_GIPHY_URL,
+            }),
+          }),
+        };
+      });
+
+      const createApp = (await import('@/app')).default;
+
+      const db = await createTestDatabase();
+      const app = createApp(db);
+
+      const [sprint] = await createSprints(fakeSprint());
+
+      const messageObject = {
+        username: 'name',
+        sprintCode: sprint.sprintCode,
+      };
+
       const { body } = await supertest(app)
-        .get('/messages?username=Tomas&sprint=WD-1.1')
+        .post('/messages')
+        .send(messageObject)
+        .expect(StatusCodes.INTERNAL_SERVER_ERROR);
+
+      expect(body.error.message).toBe(ERROR_INSERTING_MESSAGE_TO_DATABASE);
+    });
+
+    it('Should return 400 if the username is missing', async () => {
+      const { body } = await supertest(app)
+        .post('/messages')
+        .send(omit(['username'], fakeMessage()))
+        .expect(StatusCodes.BAD_REQUEST);
+
+      expect(body.error.message).toMatch(/username/i);
+    });
+
+    it('Should return 400 if the sprintCode is missing', async () => {
+      const { body } = await supertest(app)
+        .post('/messages')
+        .send(omit(['sprintCode'], fakeMessage()))
+        .expect(StatusCodes.BAD_REQUEST);
+
+      expect(body.error.message).toMatch(/sprintCode/i);
+    });
+
+    it('Should return 404 if the sprint does not exist', async () => {
+      await createTemplates(fakeTemplate());
+
+      const { body } = await supertest(app)
+        .post('/messages')
+        .send(fakeMessage())
         .expect(StatusCodes.NOT_FOUND);
 
-      expect(body.error.message).toMatch(/Messages with username/);
+      expect(body.error.message).toMatch(ERROR_NO_SPRINT);
     });
 
-    it('Should return 404 if messages for the given sprint are not found', async () => {
-      const [createdMessage] = await createMessages(
-        fakeMessage({ sprintCode: 'WD-1.1' })
-      );
+    it('Should return 201 and post message', async () => {
+      const [template] = await createTemplates(fakeTemplate());
 
-      const username = createdMessage.username;
-      const invalidSprint = 'WD-1.2';
+      const [sprint] = await createSprints(fakeSprint());
 
-      const { body } = await supertest(app)
-        .get(`/messages?username=${username}&sprint=${invalidSprint}`)
-        .expect(StatusCodes.NOT_FOUND);
-
-      expect(body.error.message).toMatch(/Messages with sprintCode/);
-    });
-
-    it('Should return 404 if messages for the given username and sprint are not found', async () => {
-      const [firstCreatedMessage] = await createMessages(
-        fakeMessage({
-          sprintCode: 'WD-1.1',
-        })
-      );
-
-      const [secondCreatedMessage] = await createMessages(
-        fakeMessage({
-          username: firstCreatedMessage.username + 'a',
-          sprintCode: 'WD-1.2',
-        })
-      );
-
-      const firstMessageUsername = firstCreatedMessage.username;
-      const secondMessageSprintCode = secondCreatedMessage.sprintCode;
+      const messageObject = {
+        username: 'name',
+        sprintCode: sprint.sprintCode,
+      };
 
       const { body } = await supertest(app)
-        .get(
-          `/messages?username=${firstMessageUsername}&sprint=${secondMessageSprintCode}`
-        )
-        .expect(StatusCodes.NOT_FOUND);
+        .post('/messages')
+        .send(messageObject)
+        .expect(StatusCodes.CREATED);
 
-      expect(body.error.message).toMatch(
-        `Messages with username: ${firstMessageUsername} and sprintCode: ${secondMessageSprintCode}`
-      );
-    });
+      const formedMessage = formatTemplateMessage(template.templateMessage, {
+        username: 'name',
+        sprintTitle: 'Python programming',
+      });
 
-    it('Should return 200 and all messages', async () => {
-      const [createdMessage] = await createMessages(fakeMessage());
+      const formedMessageObject = {
+        message: formedMessage,
+        ...messageObject,
+      };
 
-      const username = createdMessage.username;
-      const sprint = createdMessage.sprintCode;
-
-      const { body } = await supertest(app)
-        .get(`/messages?username=${username}&sprint=${sprint}`)
-        .expect(StatusCodes.OK);
-
-      expect(body).toEqual([messageMatcher()]);
-    });
-  });
-
-  describe('Query for username', () => {
-    it('Should return 404 if messages for the given username are not found', async () => {
-      const { body } = await supertest(app)
-        .get('/messages?username=Tomas')
-        .expect(StatusCodes.NOT_FOUND);
-
-      expect(body.error.message).toMatch(/Messages with username/);
-    });
-
-    it('Should return 200 and messages with given username', async () => {
-      await createMessages(
-        INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
-      );
-
-      const { body } = await supertest(app)
-        .get(`/messages?username=${INSERTABLE_MESSAGES[0].username}`)
-        .expect(StatusCodes.OK);
-
-      expect(body).toEqual([messageMatcher(INSERTABLE_MESSAGES[0])]);
-    });
-  });
-
-  describe('Query for sprint', () => {
-    it('Should return 404 if messages for the given sprint are not found', async () => {
-      const { body } = await supertest(app)
-        .get('/messages?sprint=WD-1.1')
-        .expect(StatusCodes.NOT_FOUND);
-
-      expect(body.error.message).toMatch(/Messages with sprintCode/);
-    });
-
-    it('Should return 200 and messages with given sprint', async () => {
-      await createMessages(
-        INSERTABLE_MESSAGES.map((message) => fakeMessage(message))
-      );
-
-      const { body } = await supertest(app)
-        .get(`/messages?sprint=${INSERTABLE_MESSAGES[0].sprintCode}`)
-        .expect(StatusCodes.OK);
-
-      expect(body).toEqual([messageMatcher(INSERTABLE_MESSAGES[0])]);
+      expect(body).toEqual(messageMatcher(formedMessageObject));
     });
   });
 });
 
-describe('POST', () => {
-  it('Should return 500 in case of insertion to database error', async () => {
-    vi.resetModules();
+describe('Route /messages/:id', () => {
+  describe('GET', () => {
+    it('Should return 404 and throw an error MessageByIdNotFound', async () => {
+      const { body } = await supertest(app)
+        .get('/messages/999')
+        .expect(StatusCodes.NOT_FOUND);
 
-    vi.doMock('../service', () => {
-      return {
-        default: () => ({
-          createMessage: vi.fn().mockRejectedValue(new Error()),
-          formMessage: vi.fn().mockResolvedValue({
-            message: 'message',
-            gifUrl: FAKE_GIPHY_URL,
-          }),
-        }),
-      };
+      expect(body.error.message).toMatch(/Message with id/i);
     });
 
-    const createApp = (await import('@/app')).default;
+    it('Should return 200 and message by given id', async () => {
+      const [message] = await createMessages(fakeMessage());
 
-    const db = await createTestDatabase();
-    const app = createApp(db);
+      const { body } = await supertest(app)
+        .get(`/messages/${message.id}`)
+        .expect(StatusCodes.OK);
 
-    const [sprint] = await createSprints(fakeSprint());
-
-    const messageObject = {
-      username: 'name',
-      sprintCode: sprint.sprintCode,
-    };
-
-    const { body } = await supertest(app)
-      .post('/messages')
-      .send(messageObject)
-      .expect(StatusCodes.INTERNAL_SERVER_ERROR);
-
-    expect(body.error.message).toBe(ERROR_INSERTING_MESSAGE_TO_DATABASE);
-  });
-
-  it('Should return 400 if the username is missing', async () => {
-    const { body } = await supertest(app)
-      .post('/messages')
-      .send(omit(['username'], fakeMessage()))
-      .expect(StatusCodes.BAD_REQUEST);
-
-    expect(body.error.message).toMatch(/username/i);
-  });
-
-  it('Should return 400 if the sprintCode is missing', async () => {
-    const { body } = await supertest(app)
-      .post('/messages')
-      .send(omit(['sprintCode'], fakeMessage()))
-      .expect(StatusCodes.BAD_REQUEST);
-
-    expect(body.error.message).toMatch(/sprintCode/i);
-  });
-
-  it('Should return 404 if the sprint does not exist', async () => {
-    await createTemplates(fakeTemplate());
-
-    const { body } = await supertest(app)
-      .post('/messages')
-      .send(fakeMessage())
-      .expect(StatusCodes.NOT_FOUND);
-
-    expect(body.error.message).toMatch(ERROR_NO_SPRINT);
-  });
-
-  it('Should return 201 and post message', async () => {
-    const [template] = await createTemplates(fakeTemplate());
-
-    const [sprint] = await createSprints(fakeSprint());
-
-    const messageObject = {
-      username: 'name',
-      sprintCode: sprint.sprintCode,
-    };
-
-    const { body } = await supertest(app)
-      .post('/messages')
-      .send(messageObject)
-      .expect(StatusCodes.CREATED);
-
-    const formedMessage = formatTemplateMessage(template.templateMessage, {
-      username: 'name',
-      sprintTitle: 'Python programming',
+      expect(body).toStrictEqual(message);
     });
-
-    const formedMessageObject = {
-      message: formedMessage,
-      ...messageObject,
-    };
-
-    expect(body).toEqual(messageMatcher(formedMessageObject));
   });
 });

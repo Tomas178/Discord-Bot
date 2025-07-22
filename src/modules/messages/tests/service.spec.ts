@@ -10,6 +10,7 @@ import { formatTemplateMessage } from '../utils/formatTemplateMessage/formatTemp
 import NotFound from '@/utils/errors/NotFound';
 import { ERROR_NO_SPRINT, ERROR_NO_TEMPLATES } from '../utils/constants';
 import {
+  MessageByIdNotFound,
   MessagesBySprintCodeNotFound,
   MessagesByUsernameAndSprintCodeNotFound,
   MessagesByUsernameNotFound,
@@ -45,6 +46,24 @@ describe('findAll', () => {
     expect(messages).toEqual(
       INSERTABLE_MESSAGES.map((message) => messageMatcher(message))
     );
+  });
+});
+
+describe('findById', () => {
+  it('Should throw an error MessageByIdNotFound', async () => {
+    const id = 999;
+
+    await expect(service.findById(id)).rejects.toThrow(
+      new MessageByIdNotFound(id)
+    );
+  });
+
+  it('Should return message by given id', async () => {
+    const [createdMessage] = await createMessages(fakeMessage());
+
+    const messageInDatabase = await service.findById(createdMessage.id);
+
+    expect(messageInDatabase).toStrictEqual(createdMessage);
   });
 });
 

@@ -35,6 +35,20 @@ describe('findAll', () => {
   });
 });
 
+describe('findById', () => {
+  it('Should return message by given id', async () => {
+    const [message] = await createMessages(fakeMessage());
+
+    const messageInDatabase = await model.findById(message.id);
+    expect(messageInDatabase).toStrictEqual(message);
+  });
+
+  it('Should return undefined if the message is not found', async () => {
+    const messageInDatabase = await model.findById(999);
+    expect(messageInDatabase).toBeUndefined();
+  });
+});
+
 describe('findByUsernameAndSprintCode', () => {
   it('Should return an empty array', async () => {
     const messages = await model.findByUsernameAndSprintCode(
