@@ -168,9 +168,28 @@ Set up the .env file
 npm run migrate:latest
 ```
 
-### Starting the project
+## Running the server
+
+In development mode:
 
 ```bash
-npm run dev - for instant refreshes when file is saved
-npm run start - for non-interruptable interaction with application
+npm run dev
 ```
+
+In production mode:
+
+```bash
+npm run start
+```
+
+## Updating types
+
+If you make changes to the database schema, you will need to update the types. You can do this by running the following command:
+
+```bash
+npm run gen:types
+```
+
+### Link to Peer programming exercise
+
+<a href="https://github.com/Tomas178/Back-end-practice/tree/main" target="_blank">Peer programming Exercise</a>
