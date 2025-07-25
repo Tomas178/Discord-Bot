@@ -168,7 +168,23 @@ Set up the .env file
 npm run migrate:latest
 ```
 
-## Running the server
+### Setting up username in Discord server
+
+❗ Change Discord username in server to the one that you make **POST** requests to `/messages`
+
+**Example:**\
+if Discord username in server is `Username` then the **POST** request to `/messages` should be made like that:/
+
+```json
+{
+  "username": "Username",
+  "sprint": "WD-1.1"
+}
+```
+
+❗ sprint must match this pattern `Course-Module.Sprint`
+
+### Running the server
 
 In development mode:
 
@@ -182,7 +198,7 @@ In production mode:
 npm run start
 ```
 
-## Updating types
+### Updating types
 
 If you make changes to the database schema, you will need to update the types. You can do this by running the following command:
 
