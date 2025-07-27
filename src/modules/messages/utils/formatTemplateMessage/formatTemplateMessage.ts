@@ -7,7 +7,7 @@ export function formatTemplateMessage(
 ): string {
   let message = template;
 
-  message = message.replace('{username}', replacements.username);
+  message = message.replaceAll('{username}', replacements.username);
   message = message.replace('{sprintTitle}', replacements.sprintTitle);
 
   return message;

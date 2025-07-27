@@ -12,6 +12,7 @@ import {
   MessagesByUsernameNotFound,
 } from './utils/errors';
 import { fetchRandomCelebrationGif } from './utils/giphyClient/giphyClient';
+import { TemplateNotFound } from '../templates/utils/errors';
 
 export default (db: Database) => {
   const messages = buildMessagesModel(db);
@@ -76,19 +77,35 @@ export default (db: Database) => {
       return messagesInDatabase;
     },
 
-    formMessage: async (username: string, sprintCode: string) => {
-      const allTemplates = await templates.findAll();
-      if (allTemplates.length === 0) {
-        throw new NotFound(ERROR_NO_TEMPLATES);
-      }
-
+    formMessage: async (
+      username: string,
+      sprintCode: string,
+      templateId?: number
+    ) => {
       const sprintExists = await sprints.findBySprintCode(sprintCode);
       if (!sprintExists) {
         throw new NotFound(ERROR_NO_SPRINT);
       }
 
-      const randomIndex = Math.floor(Math.random() * allTemplates.length);
-      const { templateMessage } = allTemplates[randomIndex];
+      let templateMessage = undefined;
+
+      if (templateId) {
+        const templateWithId = await templates.findById(templateId);
+        if (!templateWithId) throw new TemplateNotFound(templateId);
+
+        templateMessage = templateWithId.templateMessage;
+      } else {
+        const allTemplates = await templates.findAll();
+        if (allTemplates.length === 0) {
+          throw new NotFound(ERROR_NO_TEMPLATES);
+        }
+
+        const randomIndex = Math.floor(Math.random() * allTemplates.length);
+
+        const template = allTemplates[randomIndex];
+
+        templateMessage = template.templateMessage;
+      }
 
       const { sprintTitle } = await sprints.getSprintTitle(sprintCode);
 

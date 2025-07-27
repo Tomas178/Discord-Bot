@@ -8,6 +8,7 @@ import { Client } from 'discord.js';
 import sendMessageToDiscordServer from '@/utils/discord/sendMessageToDiscordServer';
 import { ERROR_INSERTING_MESSAGE_TO_DATABASE } from './utils/constants';
 import { GetRequest, PostRequest } from './utils/types';
+import * as templatesSchema from '@/modules/templates/schema';
 
 export default (db: Database, discordClient: Client) => {
   const router = Router();
@@ -33,11 +34,21 @@ export default (db: Database, discordClient: Client) => {
       jsonRoute(async (req: Request<{}, {}, PostRequest>) => {
         const { username, sprintCode } = schema.parseInsertable(req.body);
 
+        let templateId = undefined;
+
+        if (req.body.templateId) {
+          templateId = templatesSchema.parseId(req.body.templateId);
+        }
+
         let message: string;
         let gifUrl: string;
 
         try {
-          const result = await service.formMessage(username, sprintCode);
+          const result = await service.formMessage(
+            username,
+            sprintCode,
+            templateId
+          );
           message = result.message;
           gifUrl = result.gifUrl;
         } catch (error) {
