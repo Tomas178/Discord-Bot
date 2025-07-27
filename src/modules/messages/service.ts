@@ -82,11 +82,6 @@ export default (db: Database) => {
       sprintCode: string,
       templateId?: number
     ) => {
-      const sprintExists = await sprints.findBySprintCode(sprintCode);
-      if (!sprintExists) {
-        throw new NotFound(ERROR_NO_SPRINT);
-      }
-
       let templateMessage = undefined;
 
       if (templateId) {
@@ -105,6 +100,11 @@ export default (db: Database) => {
         const template = allTemplates[randomIndex];
 
         templateMessage = template.templateMessage;
+      }
+
+      const sprintExists = await sprints.findBySprintCode(sprintCode);
+      if (!sprintExists) {
+        throw new NotFound(ERROR_NO_SPRINT);
       }
 
       const { sprintTitle } = await sprints.getSprintTitle(sprintCode);
