@@ -37,7 +37,8 @@
     ```json
     {
       "username": "Username",
-      "sprint": "WD-1.1"
+      "sprint": "WD-1.1",
+      "templateId": "1" - optional
     }
     ```
     ❗ sprint must match this pattern `Course-Module.Sprint`
@@ -205,7 +206,3 @@ If you make changes to the database schema, you will need to update the types. Y
 ```bash
 npm run gen:types
 ```
-
-### Link to Peer programming exercise
-
-<a href="https://github.com/Tomas178/Back-end-practice/tree/main" target="_blank">Peer programming Exercise</a>
